@@ -15,7 +15,48 @@
   </ion-header>
 
   <div id="container">
-    <strong class="capitalize">{{ folder }}</strong>
-    <p>Explore <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+
+    <div *ngIf="routeKey === 'Account'">
+      <div [ngSwitch]="accountStatus">
+        <div *ngSwitchCase="1">
+          <app-register (click_register_event)="redirect_login($event)"></app-register>
+        </div>
+        <div *ngSwitchCase="2">
+          <app-login  (click_register_event)="click_register($event)"
+                      (click_login_event)="click_login($event)"></app-login>
+        </div>
+        <div *ngSwitchCase="3">
+          <app-account-info (click_update_event)="click_update($event)"></app-account-info>
+        </div>                
+        <div *ngSwitchDefault>
+          Have an error! Thinking....
+        </div>
+      </div>                  
+    </div>
+
+    <div *ngIf="routeKey === 'Book_A_Bike'">
+      
+    </div>
+
+    <div *ngIf="routeKey === 'Histories_Customer'">
+      
+    </div>
+
+    <div *ngIf="routeKey === 'Select_A_Customer'">
+      <app-login></app-login>
+    </div>
+
+    <div *ngIf="routeKey === 'Histories_Transport'">
+      <app-login></app-login>
+    </div>
+
+    <div *ngIf="routeKey === 'Customers'">
+      <app-login></app-login>
+    </div>
+
+    <div *ngIf="routeKey === 'Money_And_Fee'">
+      <app-login></app-login>
+    </div>    
+
   </div>
 </ion-content>
