@@ -7,26 +7,11 @@
     </ion-buttons>
     
   </ion-toolbar>
-
-  <ion-toolbar color="primary">
-    <ion-searchbar [(ngModel)]="autocomplete.input" (ionInput)="UpdateSearchResults()" placeholder="Search for a place"  (ionClear)="ClearAutocomplete()"></ion-searchbar>
-  </ion-toolbar>
-  <ion-list [hidden]="autocompleteItems.length == 0">
-    <ion-item *ngFor="let item of autocompleteItems" tappable (click)="SelectSearchResult(item)">
-      {{ item.description }}
-    </ion-item>
-  </ion-list>
-  <ion-row>    
-    <ion-col size="6">
-      <ion-text></ion-text>
-    </ion-col>
-    <ion-col size="6">
-      <ion-button (click)="loadMap()" shape="round" fill="outline">
-        <ion-icon slot="start" name="locate"></ion-icon>
-          Where I Am
-        </ion-button>
-    </ion-col>
-  </ion-row> 
+  
+  <div *ngIf="routeKey === 'Book_A_Bike'">
+    <app-google-search></app-google-search>
+    <app-google-my-location></app-google-my-location>
+  </div>  
 
 </ion-header>
 
@@ -39,7 +24,7 @@
 
   <div id="container">
 
-    <div *ngIf="routeKey === 'Account123'">
+    <div *ngIf="routeKey === 'Account'">
       <div [ngSwitch]="accountStatus">
         <div *ngSwitchCase="1">
           <app-register (click_register_event)="redirect_login($event)"></app-register>
@@ -55,22 +40,12 @@
           Have an error! Thinking....
         </div>
       </div>                  
-    </div>
+    </div>    
 
-    <ion-fab vertical="bottom" horizontal="start" slot="fixed">
-      <ion-fab-button (click)="ShowCords()" ion-fab color="tertiary">
-        <ion-icon name="information-circle-outline"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
-    <div class="map-wrapper" style="height: 100%;">      
-      <div id="map_center">
-        <ion-icon name="pin" size="large" color="danger"></ion-icon>      
-      </div>
-      <div #map id="map"></div>
-    </div>
+    
 
     <div *ngIf="routeKey === 'Book_A_Bike'">
-      
+      <app-google-map></app-google-map>
     </div>
 
     <div *ngIf="routeKey === 'Histories_Customer'">
