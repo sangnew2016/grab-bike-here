@@ -26,3 +26,17 @@ ion-menu-button {
 #container a {
   text-decoration: none;
 }
+
+/*=========================================
+  LOGIN
+=========================================*/
+ion-item{
+  --background: #fff;
+  --color: #000;
+}
+ion-button{
+  --background: #000;
+}
+a {
+  color: #fff;
+}
