@@ -49,4 +49,8 @@ export class FolderPage implements OnInit {
     this.globalService.callbackLoadMapEmitter.emit('sang thach');
   }
 
+  click_command(emittedValue) {
+    alert(emittedValue);
+  }
+
 }

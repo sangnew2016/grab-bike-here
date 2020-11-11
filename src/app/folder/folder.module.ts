@@ -15,12 +15,21 @@ import { GlobalService } from '../utils/global.service';
 import { GoogleSearchComponent } from '../components/google-search/google-search.component';
 import { GoogleMyLocationComponent } from '../components/google-my-location/google-my-location.component';
 import { GoogleMapComponent } from '../components/google-map/google-map.component';
+import { CommandComponent } from '../components/command/command.component';
 
 @NgModule({
-  declarations: [FolderPage, LoginComponent, AccountInfoComponent, RegisterComponent,
+  declarations: [
+    FolderPage,
+    LoginComponent,
+    AccountInfoComponent,
+    RegisterComponent,
+
+    CommandComponent,
+
     GoogleMapComponent,
     GoogleMyLocationComponent,
-    GoogleSearchComponent],
+    GoogleSearchComponent
+  ],
   imports: [
     CommonModule,
     FormsModule,

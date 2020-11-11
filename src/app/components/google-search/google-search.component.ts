@@ -36,7 +36,7 @@ export class GoogleSearchComponent implements OnInit {
 
   ngOnInit() {
     this.globalService.callbackGetAddressEmitter.subscribe((address) => {
-      alert(address);
+      this.autocomplete.input = address;
     });
   }
 

@@ -23,6 +23,9 @@ export class GoogleMapComponent implements OnInit {
   placeid: any;
   GoogleAutocomplete: any;
 
+  GeoCoder: any;    // for browers
+  markers: any[] = [];
+
   constructor(private geolocation: Geolocation,
               private nativeGeocoder: NativeGeocoder,
               public zone: NgZone,
@@ -31,6 +34,8 @@ export class GoogleMapComponent implements OnInit {
     this.GoogleAutocomplete = new google.maps.places.AutocompleteService();
     this.autocomplete = { input: '' };
     this.autocompleteItems = [];
+
+    this.GeoCoder = new google.maps.Geocoder();
   }
 
   ngOnInit() {
@@ -39,6 +44,25 @@ export class GoogleMapComponent implements OnInit {
 
     this.globalService.callbackLoadMapEmitter.subscribe((value) => {
       this.loadMap();
+    });
+  }
+
+  // only run on browers
+  codeLatLng(lat, lng, service) {
+    const latlng = new google.maps.LatLng(lat, lng);
+    this.GeoCoder.geocode({
+        latLng: latlng
+      }, function(results, status) {
+        if (status === google.maps.GeocoderStatus.OK) {
+          if (results[1]) {
+            console.log(results[1]);
+            service.callbackGetAddressEmitter.emit(results[1].formatted_address);
+          } else {
+            alert('No results found');
+          }
+        } else {
+          alert('Geocoder failed due to: ' + status);
+        }
     });
   }
 
@@ -60,11 +84,45 @@ export class GoogleMapComponent implements OnInit {
 
       this.map.addListener('tilesloaded', () => {
         console.log('accuracy', this.map, this.map.center.lat());
-        this.getAddressFromCoords(this.map.center.lat(), this.map.center.lng());        
+
+        // only for native device
+        this.getAddressFromCoords(this.map.center.lat(), this.map.center.lng());
 
         this.lat = this.map.center.lat();
         this.long = this.map.center.lng();
       });
+
+      this.map.addListener('click', (event) => {
+          // tslint:disable-next-line: prefer-for-of
+          for (let i = 0; i < this.markers.length; i++) {
+            this.markers[i].setMap(null);
+          }
+          this.markers = [];
+
+          // Get the location that the user clicked.
+          let clickedLocation = event.latLng;
+
+          // Create the marker.
+          let marker = new google.maps.Marker({
+            position: clickedLocation,
+            map: this.map,
+            //icon: Image,
+            title: 'Destination: HERE',
+            draggable: false,
+            label: {
+              text: 'Destination: HERE',
+              color: '#222222',
+              fontSize: '12px'
+            }
+          });
+
+
+          this.markers.push(marker);
+
+          console.log(marker);
+          this.codeLatLng(clickedLocation.lat(), clickedLocation.lng(), this.globalService);
+      });
+
     }).catch((error) => {
       console.log('Error getting location', error);
     });
@@ -81,7 +139,7 @@ export class GoogleMapComponent implements OnInit {
       .then((result: NativeGeocoderResult[]) => {
         this.address = '';
         const responseAddress = [];
-        for (let [key, value] of Object.entries(result[0])) {
+        for (const [key, value] of Object.entries(result[0])) {
           if (value.length > 0) {
             responseAddress.push(value);
           }
