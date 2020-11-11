@@ -43,5 +43,10 @@ export class FolderPage implements OnInit {
     this.accountStatus = emittedValue;      // 3 = account info
   }
 
+  click_whereIam(emittedValue) {
+    if (!emittedValue) { return; }
+
+    this.globalService.callbackLoadMapEmitter.emit('sang thach');
+  }
 
 }

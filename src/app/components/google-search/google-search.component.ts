@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { NativeGeocoder, NativeGeocoderResult, NativeGeocoderOptions } from '@ionic-native/native-geocoder/ngx';
+import { GlobalService } from '../../utils/global.service';
 
 declare var google;
 
@@ -25,14 +26,19 @@ export class GoogleSearchComponent implements OnInit {
   constructor(
     // private geolocation: Geolocation,
     // private nativeGeocoder: NativeGeocoder,
-    public zone: NgZone
+    public zone: NgZone,
+    private globalService: GlobalService
   ) {
     this.GoogleAutocomplete = new google.maps.places.AutocompleteService();
     this.autocomplete = { input: '' };
     this.autocompleteItems = [];
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.globalService.callbackGetAddressEmitter.subscribe((address) => {
+      alert(address);
+    });
+  }
 
   // // LOADING THE MAP HAS 2 PARTS.
   // loadMap() {

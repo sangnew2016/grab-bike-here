@@ -10,7 +10,7 @@
   
   <div *ngIf="routeKey === 'Book_A_Bike'">
     <app-google-search></app-google-search>
-    <app-google-my-location></app-google-my-location>
+    <app-google-my-location (click_whereIam_event)="click_whereIam($event)"></app-google-my-location>
   </div>  
 
 </ion-header>

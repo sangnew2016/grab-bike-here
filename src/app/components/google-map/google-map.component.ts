@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { NativeGeocoder, NativeGeocoderResult, NativeGeocoderOptions } from '@ionic-native/native-geocoder/ngx';
+import { GlobalService } from '../../utils/global.service';
 
 declare var google;
 
@@ -24,7 +25,8 @@ export class GoogleMapComponent implements OnInit {
 
   constructor(private geolocation: Geolocation,
               private nativeGeocoder: NativeGeocoder,
-              public zone: NgZone)
+              public zone: NgZone,
+              private globalService: GlobalService)
   {
     this.GoogleAutocomplete = new google.maps.places.AutocompleteService();
     this.autocomplete = { input: '' };
@@ -34,6 +36,10 @@ export class GoogleMapComponent implements OnInit {
   ngOnInit() {
     // load map
     this.loadMap();
+
+    this.globalService.callbackLoadMapEmitter.subscribe((value) => {
+      this.loadMap();
+    });
   }
 
   // LOADING THE MAP HAS 2 PARTS.
@@ -54,7 +60,8 @@ export class GoogleMapComponent implements OnInit {
 
       this.map.addListener('tilesloaded', () => {
         console.log('accuracy', this.map, this.map.center.lat());
-        this.getAddressFromCoords(this.map.center.lat(), this.map.center.lng());
+        this.getAddressFromCoords(this.map.center.lat(), this.map.center.lng());        
+
         this.lat = this.map.center.lat();
         this.long = this.map.center.lng();
       });
@@ -84,6 +91,9 @@ export class GoogleMapComponent implements OnInit {
           this.address += value + ', ';
         }
         this.address = this.address.slice(0, -2);
+
+        // send address to
+        this.globalService.callbackGetAddressEmitter.emit(this.address);
       })
       .catch((error: any) => {
         this.address = 'Address Not Available!';
