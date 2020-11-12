@@ -1,4 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { GlobalService } from 'src/app/utils/global.service';
 
 @Component({
   selector: 'app-google-my-location',
@@ -11,12 +12,20 @@ export class GoogleMyLocationComponent implements OnInit {
   // tslint:disable-next-line: variable-name
   click_whereIam_event: EventEmitter<number> = new EventEmitter<number>();
 
-  constructor()
+  distance = 0;
+  amount = 0;
+
+  constructor(private globalService: GlobalService)
   {
 
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.globalService.callback_GetDistanceAndAmount_Emitter.subscribe((distanceAndAmount) => {
+      this.distance = distanceAndAmount.distance;
+      this.amount = distanceAndAmount.amount;
+    });
+  }
 
   // EMIT EVENT OUT
   loadMap() {

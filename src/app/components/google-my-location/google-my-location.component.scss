@@ -1,7 +1,30 @@
 .container {
-    opacity: 1; 
-    order: 100; 
-    background-color: #fff; 
+    opacity: 0.75; 
+    order: 75; 
+    background-color: #333; 
     border: 1px solid red; 
     padding: 1px 10px;   
+    color: #fff;
+}
+
+.block-distance {
+    font-size: 14px;
+}
+
+.block-amount {
+    font-size: 14px;
+}
+
+.amount-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;  
+    padding-left: 3px;
+    padding-right: 5px;
+}
+
+.distance-value {
+    font-size: 15px;
+    padding-left: 3px;
+    padding-right: 5px;
 }

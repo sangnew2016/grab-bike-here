@@ -55,7 +55,10 @@ export class GoogleMapComponent implements OnInit {
       console.log('current position: ', resp.coords.latitude, resp.coords.longitude);
 
       // GET ADDRESS
-      this.getAddressFromCoords(resp.coords.latitude, resp.coords.longitude, this.globalService);
+      // this.getAddressFromCoords(resp.coords.latitude, resp.coords.longitude, this.globalService);
+      this.getAddressFromCoordsByBrowser(resp.coords.latitude, resp.coords.longitude, (position) => {
+        this.globalService.callback_SetCurrentPosition_Emitter.emit(position);
+      });
 
       // LOAD THE MAP WITH THE PREVIOUS VALUES AS PARAMETERS.
       const latLng = new google.maps.LatLng(resp.coords.latitude, resp.coords.longitude);
@@ -70,9 +73,11 @@ export class GoogleMapComponent implements OnInit {
       this.map.addListener('tilesloaded', () => {
         this.lat = this.map.center.lat();
         this.long = this.map.center.lng();
-        
+
         // this.getAddressFromCoords(this.map.center.lat(), this.map.center.lng(), this.globalService);
-        this.getAddressFromCoordsByBrowser(this.map.center.lat(), this.map.center.lng(), this.globalService);
+        this.getAddressFromCoordsByBrowser(this.map.center.lat(), this.map.center.lng(), (position) => {
+          this.globalService.callback_SetDestinationPosition_Emitter.emit(position);
+        });
       });
 
       // SET EVENT 'click, tap'
@@ -101,16 +106,18 @@ export class GoogleMapComponent implements OnInit {
           ));
 
           // this.getAddressFromCoords(clickedLocation.lat(), clickedLocation.lng(), this.globalService);
-          this.getAddressFromCoordsByBrowser(clickedLocation.lat(), clickedLocation.lng(), this.globalService);
+          this.getAddressFromCoordsByBrowser(clickedLocation.lat(), clickedLocation.lng(), (position) => {
+            this.globalService.callback_SetDestinationPosition_Emitter.emit(position);
+          });
       });
 
     }).catch((error) => {
-      console.log('Error getting location', error);
+      console.log('Error at loadMap - getCurrentPosition: ', error);
     });
   }
 
 
-  getAddressFromCoords(lattitude, longitude, service) {
+  getAddressFromCoords(lattitude, longitude, callback) {
     const options: NativeGeocoderOptions = {
       useLocale: true,
       maxResults: 5
@@ -133,8 +140,7 @@ export class GoogleMapComponent implements OnInit {
         }
 
         this.address = this.address.slice(0, -2);
-
-        service.callback_GetPosition_Emitter.emit({
+        callback({
           address: this.address,
           latitude: lattitude,
           longtitude: longitude
@@ -146,24 +152,24 @@ export class GoogleMapComponent implements OnInit {
   }
 
   // only run on browers
-  getAddressFromCoordsByBrowser(latitude, longtitude, service) {
+  getAddressFromCoordsByBrowser(latitude, longtitude, callback) {
     const latlng = new google.maps.LatLng(latitude, longtitude);
     this.GeoCoder.geocode({ latLng: latlng }, (results, status) => {
       if (status === google.maps.GeocoderStatus.OK) {
         const address = results[1];
         if (address) {
-          console.log(address);
+          console.log('Get address by coord: ', address);
 
-          service.callback_SetDestinationPosition_Emitter.emit({
+          callback({
             address: address.formatted_address,
             latitude,
             longtitude
           });
-        } else {
-          alert('No results found by get Address by Coords');
+        } else {          
+          console.log('Error at getAddressFromCoordsByBrowser: ', 'No results found by get Address by Coords');
         }
-      } else {
-        alert('Geocoder failed due to: ' + status);
+      } else {        
+        console.log('Error at getAddressFromCoordsByBrowser: ', status);
       }
     });
   }
