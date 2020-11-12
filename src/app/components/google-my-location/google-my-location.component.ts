@@ -8,28 +8,23 @@ import { GlobalService } from 'src/app/utils/global.service';
 })
 export class GoogleMyLocationComponent implements OnInit {
 
-  @Output()
-  // tslint:disable-next-line: variable-name
-  click_whereIam_event: EventEmitter<number> = new EventEmitter<number>();
-
   distance = 0;
   amount = 0;
 
   constructor(private globalService: GlobalService)
   {
-
   }
 
   ngOnInit() {
+    // listener
     this.globalService.callback_GetDistanceAndAmount_Emitter.subscribe((distanceAndAmount) => {
       this.distance = distanceAndAmount.distance;
       this.amount = distanceAndAmount.amount;
     });
   }
 
-  // EMIT EVENT OUT
-  loadMap() {
-    this.click_whereIam_event.emit(1);      // 1 = click    
+  whereIam() {
+    this.globalService.callback_LoadMap_Emitter.emit();
   }
 
 }

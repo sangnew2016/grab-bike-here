@@ -39,17 +39,15 @@ export class GoogleMapComponent implements OnInit {
   }
 
   ngOnInit() {
-    // load map
     this.loadMap();
 
-    this.globalService.callback_LoadMap_Emitter.subscribe((value) => {
+    // listener
+    this.globalService.callback_LoadMap_Emitter.subscribe(() => {
       this.loadMap();
     });
   }
 
-  // LOADING THE MAP HAS 2 PARTS.
   loadMap() {
-
     // FIRST GET THE LOCATION FROM THE DEVICE.
     this.geolocation.getCurrentPosition().then((resp) => {
       console.log('current position: ', resp.coords.latitude, resp.coords.longitude);
@@ -165,10 +163,10 @@ export class GoogleMapComponent implements OnInit {
             latitude,
             longtitude
           });
-        } else {          
+        } else {
           console.log('Error at getAddressFromCoordsByBrowser: ', 'No results found by get Address by Coords');
         }
-      } else {        
+      } else {
         console.log('Error at getAddressFromCoordsByBrowser: ', status);
       }
     });
