@@ -42,27 +42,8 @@ export class GoogleMapComponent implements OnInit {
     // load map
     this.loadMap();
 
-    this.globalService.callbackLoadMapEmitter.subscribe((value) => {
+    this.globalService.callback_LoadMap_Emitter.subscribe((value) => {
       this.loadMap();
-    });
-  }
-
-  // only run on browers
-  codeLatLng(lat, lng, service) {
-    const latlng = new google.maps.LatLng(lat, lng);
-    this.GeoCoder.geocode({
-        latLng: latlng
-      }, function(results, status) {
-        if (status === google.maps.GeocoderStatus.OK) {
-          if (results[1]) {
-            console.log(results[1]);
-            service.callbackGetAddressEmitter.emit(results[1].formatted_address);
-          } else {
-            alert('No results found');
-          }
-        } else {
-          alert('Geocoder failed due to: ' + status);
-        }
     });
   }
 
@@ -71,56 +52,56 @@ export class GoogleMapComponent implements OnInit {
 
     // FIRST GET THE LOCATION FROM THE DEVICE.
     this.geolocation.getCurrentPosition().then((resp) => {
+      console.log('current position: ', resp.coords.latitude, resp.coords.longitude);
+
+      // GET ADDRESS
+      this.getAddressFromCoords(resp.coords.latitude, resp.coords.longitude, this.globalService);
+
+      // LOAD THE MAP WITH THE PREVIOUS VALUES AS PARAMETERS.
       const latLng = new google.maps.LatLng(resp.coords.latitude, resp.coords.longitude);
       const mapOptions = {
         center: latLng,
         zoom: 15,
         mapTypeId: google.maps.MapTypeId.ROADMAP
       };
-
-      // LOAD THE MAP WITH THE PREVIOUS VALUES AS PARAMETERS.
-      this.getAddressFromCoords(resp.coords.latitude, resp.coords.longitude);
       this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
 
+      // SET EVENT 'tilesloaded'
       this.map.addListener('tilesloaded', () => {
-        console.log('accuracy', this.map, this.map.center.lat());
-
-        // only for native device
-        this.getAddressFromCoords(this.map.center.lat(), this.map.center.lng());
-
         this.lat = this.map.center.lat();
         this.long = this.map.center.lng();
+        
+        // this.getAddressFromCoords(this.map.center.lat(), this.map.center.lng(), this.globalService);
+        this.getAddressFromCoordsByBrowser(this.map.center.lat(), this.map.center.lng(), this.globalService);
       });
 
+      // SET EVENT 'click, tap'
       this.map.addListener('click', (event) => {
           // tslint:disable-next-line: prefer-for-of
-          for (let i = 0; i < this.markers.length; i++) {
-            this.markers[i].setMap(null);
-          }
+          this.markers.forEach(item => item.setMap(null));
           this.markers = [];
 
           // Get the location that the user clicked.
-          let clickedLocation = event.latLng;
+          const clickedLocation = event.latLng;
 
           // Create the marker.
-          let marker = new google.maps.Marker({
-            position: clickedLocation,
-            map: this.map,
-            //icon: Image,
-            title: 'Destination: HERE',
-            draggable: false,
-            label: {
-              text: 'Destination: HERE',
-              color: '#222222',
-              fontSize: '12px'
+          this.markers.push(new google.maps.Marker(
+            {
+              position: clickedLocation,
+              map: this.map,
+              // icon: Image,
+              title: 'Destination: HERE',
+              draggable: false,
+              label: {
+                text: 'Destination: HERE',
+                color: '#222222',
+                fontSize: '12px'
+              }
             }
-          });
+          ));
 
-
-          this.markers.push(marker);
-
-          console.log(marker);
-          this.codeLatLng(clickedLocation.lat(), clickedLocation.lng(), this.globalService);
+          // this.getAddressFromCoords(clickedLocation.lat(), clickedLocation.lng(), this.globalService);
+          this.getAddressFromCoordsByBrowser(clickedLocation.lat(), clickedLocation.lng(), this.globalService);
       });
 
     }).catch((error) => {
@@ -129,33 +110,62 @@ export class GoogleMapComponent implements OnInit {
   }
 
 
-  getAddressFromCoords(lattitude, longitude) {
-    console.log('getAddressFromCoords ' + lattitude + ' ' + longitude);
+  getAddressFromCoords(lattitude, longitude, service) {
     const options: NativeGeocoderOptions = {
       useLocale: true,
       maxResults: 5
     };
-    this.nativeGeocoder.reverseGeocode(lattitude, longitude, options)
-      .then((result: NativeGeocoderResult[]) => {
+
+    this.nativeGeocoder.reverseGeocode(lattitude, longitude, options).then(
+      (result: NativeGeocoderResult[]) => {
         this.address = '';
+
         const responseAddress = [];
         for (const [key, value] of Object.entries(result[0])) {
           if (value.length > 0) {
             responseAddress.push(value);
           }
         }
+
         responseAddress.reverse();
         for (const value of responseAddress) {
           this.address += value + ', ';
         }
+
         this.address = this.address.slice(0, -2);
 
-        // send address to
-        this.globalService.callbackGetAddressEmitter.emit(this.address);
+        service.callback_GetPosition_Emitter.emit({
+          address: this.address,
+          latitude: lattitude,
+          longtitude: longitude
+        });
       })
       .catch((error: any) => {
         this.address = 'Address Not Available!';
       });
+  }
+
+  // only run on browers
+  getAddressFromCoordsByBrowser(latitude, longtitude, service) {
+    const latlng = new google.maps.LatLng(latitude, longtitude);
+    this.GeoCoder.geocode({ latLng: latlng }, (results, status) => {
+      if (status === google.maps.GeocoderStatus.OK) {
+        const address = results[1];
+        if (address) {
+          console.log(address);
+
+          service.callback_GetPosition_Emitter.emit({
+            address: address.formatted_address,
+            latitude,
+            longtitude
+          });
+        } else {
+          alert('No results found by get Address by Coords');
+        }
+      } else {
+        alert('Geocoder failed due to: ' + status);
+      }
+    });
   }
 
   // FUNCTION SHOWING THE COORDINATES OF THE POINT AT THE CENTER OF THE MAP

@@ -12,7 +12,7 @@ export class CommandComponent implements OnInit {
   click_command_event: EventEmitter<number> = new EventEmitter<number>();
 
   @Input() name: string;
-  @Input() isActive: boolean;
+  @Input() status: string;
 
   constructor() { }
 

@@ -13,8 +13,10 @@ export class FolderPage implements OnInit {
   public routeKey: string;
   public accountStatus: number;
 
+  public commandStatus = 'disable';
+
   constructor(private activatedRoute: ActivatedRoute,
-              private globalService: GlobalService,
+              public globalService: GlobalService,
               private utilsService: UtilsService
               )
   {
@@ -25,6 +27,33 @@ export class FolderPage implements OnInit {
     const id = this.activatedRoute.snapshot.paramMap.get('id');
     this.folder = this.utilsService.formatRouteId(id);
     this.routeKey = id;
+
+    // format screen with route id
+    if (id === 'Account') {
+      this.globalService.command.status = 'hide';
+    }
+    else if (id === 'Book_A_Bike') {
+      this.globalService.command.status = 'disable';
+      this.globalService.command.text = 'Book';
+    }
+    else if (id === 'Histories_Customer') {
+      this.globalService.command.status = 'hide';
+    }
+    else if (id === 'Select_A_Customer') {
+      this.globalService.command.status = 'hide';
+    }
+    else if (id === 'Histories_Transport') {
+      this.globalService.command.status = 'hide';
+    }
+    else if (id === 'Customers') {
+      this.globalService.command.status = 'hide';
+    }
+    else if (id === 'Money_And_Fee') {
+      this.globalService.command.status = 'hide';
+    }
+    else {
+      this.globalService.command.status = 'hide';
+    }
 
     // verify account status
     this.accountStatus = 2;                 // default: 2 = login
@@ -46,7 +75,7 @@ export class FolderPage implements OnInit {
   click_whereIam(emittedValue) {
     if (!emittedValue) { return; }
 
-    this.globalService.callbackLoadMapEmitter.emit('sang thach');
+    this.globalService.callback_LoadMap_Emitter.emit('sang thach');
   }
 
   click_command(emittedValue) {

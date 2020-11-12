@@ -35,8 +35,16 @@ export class GoogleSearchComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.globalService.callbackGetAddressEmitter.subscribe((address) => {
-      this.autocomplete.input = address;
+    this.globalService.callback_GetPosition_Emitter.subscribe((destination) => {
+      this.autocomplete.input = destination.address;
+
+      // update to Tree
+      this.globalService.bookABike.destinationAddress = destination.address;
+      this.globalService.bookABike.destinationLatitude = destination.latitude;
+      this.globalService.bookABike.destinationLongtitude = destination.longtitude;
+
+      // calculate distance & amount
+      // ...
     });
   }
 

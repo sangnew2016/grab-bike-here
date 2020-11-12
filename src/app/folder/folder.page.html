@@ -5,8 +5,8 @@
       <!-- <ion-title>{{ folder }}</ion-title> -->
       <div class="ion-title">{{ folder }}</div>
     </ion-buttons>
-    <div style="float: right; padding-right: 16px;">
-      <app-command name="abc" [isActive]="true" (click_command_event)="click_command($event)"></app-command>
+    <div style="float: right; padding-right: 10px;">
+      <app-command [name]="globalService.command.text" [status]="globalService.command.status" (click_command_event)="click_command($event)"></app-command>
     </div>
   </ion-toolbar>
   
