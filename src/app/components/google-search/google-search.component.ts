@@ -27,7 +27,7 @@ export class GoogleSearchComponent implements OnInit {
     // private geolocation: Geolocation,
     // private nativeGeocoder: NativeGeocoder,
     public zone: NgZone,
-    private globalService: GlobalService
+    public globalService: GlobalService
   ) {
     this.GoogleAutocomplete = new google.maps.places.AutocompleteService();
     this.autocomplete = { input: '' };
@@ -35,16 +35,8 @@ export class GoogleSearchComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.globalService.callback_GetPosition_Emitter.subscribe((destination) => {
+    this.globalService.callback_GetDestinationPosition_Emitter.subscribe((destination) => {
       this.autocomplete.input = destination.address;
-
-      // update to Tree
-      this.globalService.bookABike.destinationAddress = destination.address;
-      this.globalService.bookABike.destinationLatitude = destination.latitude;
-      this.globalService.bookABike.destinationLongtitude = destination.longtitude;
-
-      // calculate distance & amount
-      // ...
     });
   }
 

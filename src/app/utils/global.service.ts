@@ -7,7 +7,10 @@ export class GlobalService {
 
   // event emitter
   callback_LoadMap_Emitter = new EventEmitter();
-  callback_GetPosition_Emitter = new EventEmitter();
+  
+  callback_SetDestinationPosition_Emitter = new EventEmitter();
+  callback_GetDestinationPosition_Emitter = new EventEmitter();
+
   callback_SetCurrentPosition_Emitter = new EventEmitter();
 
   // object binding
@@ -36,6 +39,18 @@ export class GlobalService {
       this.bookABike.currentAddress = currentPosition.address;
       this.bookABike.currentLatitude = currentPosition.latitude;
       this.bookABike.currentLongtitude = currentPosition.longtitude;
+    });
+
+    this.callback_SetDestinationPosition_Emitter.subscribe((destination) => {            
+      this.bookABike.destinationAddress = destination.address;
+      this.bookABike.destinationLatitude = destination.latitude;
+      this.bookABike.destinationLongtitude = destination.longtitude;
+
+      // update value into google-search
+      this.callback_GetDestinationPosition_Emitter.emit(destination);
+      
+      // calculate distance & amount
+      // ...
     });
 
   }

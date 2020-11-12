@@ -154,7 +154,7 @@ export class GoogleMapComponent implements OnInit {
         if (address) {
           console.log(address);
 
-          service.callback_GetPosition_Emitter.emit({
+          service.callback_SetDestinationPosition_Emitter.emit({
             address: address.formatted_address,
             latitude,
             longtitude
