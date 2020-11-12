@@ -5,7 +5,7 @@ import { EventEmitter, Injectable } from '@angular/core';
 })
 export class GlobalService {
 
-  // event emitter
+  // 1. event emitter
   callback_LoadMap_Emitter = new EventEmitter();
 
   callback_SetDestinationPosition_Emitter = new EventEmitter();
@@ -16,7 +16,7 @@ export class GlobalService {
 
   callback_SetCommandStatus_Emitter = new EventEmitter();
 
-  // object binding
+  // 2. object binding
   command: any = {
     text: 'Unknown',
     status: 'hide'
@@ -88,8 +88,39 @@ export class GlobalService {
 
   }
 
+
+  // 3. Common function
   getToken() {
     return '';
+  }
+
+  setCommandText(routeId) {
+    // format screen with route id
+    if (routeId === 'Account') {
+      this.command.status = 'hide';
+    }
+    else if (routeId === 'Book_A_Bike') {
+      this.command.status = 'disable';
+      this.command.text = 'Book';
+    }
+    else if (routeId === 'Histories_Customer') {
+      this.command.status = 'hide';
+    }
+    else if (routeId === 'Select_A_Customer') {
+      this.command.status = 'hide';
+    }
+    else if (routeId === 'Histories_Transport') {
+      this.command.status = 'hide';
+    }
+    else if (routeId === 'Customers') {
+      this.command.status = 'hide';
+    }
+    else if (routeId === 'Money_And_Fee') {
+      this.command.status = 'hide';
+    }
+    else {
+      this.command.status = 'hide';
+    }
   }
 
 }

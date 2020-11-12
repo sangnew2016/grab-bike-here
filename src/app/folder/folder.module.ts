@@ -16,10 +16,13 @@ import { GoogleSearchComponent } from '../components/google-search/google-search
 import { GoogleMyLocationComponent } from '../components/google-my-location/google-my-location.component';
 import { GoogleMapComponent } from '../components/google-map/google-map.component';
 import { CommandComponent } from '../components/command/command.component';
+import { AccountComponent } from '../components/account/account.component';
 
 @NgModule({
   declarations: [
     FolderPage,
+
+    AccountComponent,
     LoginComponent,
     AccountInfoComponent,
     RegisterComponent,

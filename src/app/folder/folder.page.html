@@ -18,27 +18,10 @@
 
 <ion-content [fullscreen]="true">
   <div id="container">
-
     <div *ngIf="routeKey === 'Account'">
-      <div [ngSwitch]="accountStatus">
-        <div *ngSwitchCase="1">
-          <app-register (click_register_event)="redirect_login($event)"></app-register>
-        </div>
-        <div *ngSwitchCase="2">
-          <app-login  (click_register_event)="click_register($event)"
-                      (click_login_event)="click_login($event)"></app-login>
-        </div>
-        <div *ngSwitchCase="3">
-          <app-account-info (click_update_event)="click_update($event)"></app-account-info>
-        </div>                
-        <div *ngSwitchDefault>
-          Have an error! Thinking....
-        </div>
-      </div>                  
+      <app-account></app-account>                 
     </div>    
-
     
-
     <div *ngIf="routeKey === 'Book_A_Bike'">
       <app-google-map></app-google-map>
     </div>
@@ -62,6 +45,5 @@
     <div *ngIf="routeKey === 'Money_And_Fee'">
       
     </div>    
-
   </div>
 </ion-content>
