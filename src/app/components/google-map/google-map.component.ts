@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { NativeGeocoder, NativeGeocoderResult, NativeGeocoderOptions } from '@ionic-native/native-geocoder/ngx';
 import { GlobalService } from '../../utils/global.service';
@@ -10,32 +10,40 @@ declare var google;
   templateUrl: './google-map.component.html',
   styleUrls: ['./google-map.component.scss'],
 })
-export class GoogleMapComponent implements OnInit {
+export class GoogleMapComponent implements OnInit, OnDestroy {
 
   @ViewChild('map',  {static: false}) mapElement: ElementRef;
   map: any;
-  address: string;
-  lat: string;
-  long: string;
-  autocomplete: { input: string; };
-  autocompleteItems: any[];
-  location: any;
-  placeid: any;
-  GoogleAutocomplete: any;
 
-  GeoCoder: any;    // for browers
+  address: string; lat: string; long: string;
+  currentAddress: string; currentLat: string; currentLong: string;
+
+  // for browers
+  GeoCoder: any;
+
   markers: any[] = [];
+  driverMarkers: any[] = [];
+  intervalId: any;
+
+  // list of user's location
+  bounds: any;
+  infoWindow: any;
+  currentInfoWindow: any;
+  service: any;
+  infoPane: any;
 
   constructor(private geolocation: Geolocation,
               private nativeGeocoder: NativeGeocoder,
               public zone: NgZone,
               private globalService: GlobalService)
   {
-    this.GoogleAutocomplete = new google.maps.places.AutocompleteService();
-    this.autocomplete = { input: '' };
-    this.autocompleteItems = [];
-
+    // use for browser (should replace by mobile)
     this.GeoCoder = new google.maps.Geocoder();
+
+    // list of user's location
+    this.bounds = new google.maps.LatLngBounds();
+    this.infoWindow = new google.maps.InfoWindow;
+    this.currentInfoWindow = this.infoWindow;
   }
 
   ngOnInit() {
@@ -51,12 +59,26 @@ export class GoogleMapComponent implements OnInit {
       item.clearAutocomplete();
       item.setDescription(item.description);
     });
+
+    this.globalService.callback_ListOfDriverLocation_Emitter.subscribe((item) => {      
+      this.intervalId = setInterval(() => {
+        this.listOfDriverLocation(item);
+        }, 5000);
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
   }
 
   loadMap() {
     // FIRST GET THE LOCATION FROM THE DEVICE.
     this.geolocation.getCurrentPosition().then((resp) => {
       console.log('current position: ', resp.coords.latitude, resp.coords.longitude);
+      this.currentLat = resp.coords.latitude + '';
+      this.currentLong = resp.coords.longitude + '';
 
       // GET ADDRESS
       // this.getAddressFromCoords(resp.coords.latitude, resp.coords.longitude, this.globalService);
@@ -92,6 +114,8 @@ export class GoogleMapComponent implements OnInit {
 
           // Get the location that the user clicked.
           const clickedLocation = event.latLng;
+          this.lat = clickedLocation.lat();
+          this.long = clickedLocation.lng();
 
           // Create the marker.
           const markerLabel = 'Your Destination!';
@@ -130,7 +154,7 @@ export class GoogleMapComponent implements OnInit {
     }).catch((error) => {
       console.log('Error at loadMap - getCurrentPosition: ', error);
     });
-  }  
+  }
 
   getAddressFromCoords(lattitude, longitude, callback) {
     const options: NativeGeocoderOptions = {
@@ -207,6 +231,85 @@ export class GoogleMapComponent implements OnInit {
           this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
         }
       });
+  }
+
+  nearByFilter(item)
+  {
+    const getNearbyPlaces = (position) => {
+      const request = {
+        location: position,
+        rankBy: google.maps.places.RankBy.DISTANCE,
+        keyword: item.keyword
+
+        // radius: '500',            // 500 met
+        // type: ['restaurant']
+      };
+
+      this.service = new google.maps.places.PlacesService(this.map);
+      this.service.nearbySearch(request, nearbyCallback);
+    };
+
+    // Handle the results (up to 20) of the Nearby Search
+    const nearbyCallback = (results, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+          createMarkers(results);
+        }
+    };
+
+    const createMarkers = (places) => {
+      places.forEach(place => {
+        const marker = new google.maps.Marker({
+          position: place.geometry.location,
+          map: this.map,
+          title: place.name
+        });
+
+        /* TODO: Step 4B: Add click listeners to the markers */
+
+        // Adjust the map bounds to include the location of this marker
+        this.bounds.extend(place.geometry.location);
+      });
+
+      /* Once all the markers have been placed, adjust the bounds of the map to
+      * show all the markers within the visible area. */
+      this.map.fitBounds(this.bounds);
+    };
+
+    const currentPosition = new google.maps.LatLng(this.currentLat, this.currentLong);
+    this.bounds.extend(currentPosition);
+    // this.infoWindow.setPosition(currentPosition);
+    // this.infoWindow.setContent('Location found.');
+    // this.infoWindow.open(this.map);
+    this.map.setCenter(currentPosition);
+
+    /* TODO: Step 3B2, Call the Places Nearby Search */
+    getNearbyPlaces.bind(this)(currentPosition);
+  }
+
+  listOfDriverLocation(item) {
+    // 0. clear old coordinate
+    this.driverMarkers.forEach(driverMarker => driverMarker.setMap(null));
+    this.driverMarkers = [];
+
+    // 1. fake data
+    const fakeItems = [
+      {
+        userid: 'sangthach',
+        latitude: '',
+        longtitude: ''
+      }
+    ];
+
+    // 2. show coordinates -> map
+    const image = 'https://goo.gl/dqvvFA';
+    fakeItems.forEach((fakeItem) => {
+      this.driverMarkers.push(new google.maps.Marker({
+        position: { lat: fakeItem.latitude, lng: fakeItem.longtitude },
+        map: this.map,
+        icon: image,
+        title: fakeItem.userid
+      }));
+    });
   }
 
   // FUNCTION SHOWING THE COORDINATES OF THE POINT AT THE CENTER OF THE MAP

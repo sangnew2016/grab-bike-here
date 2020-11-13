@@ -9,9 +9,10 @@ export class CommandComponent implements OnInit {
 
   @Output()
   // tslint:disable-next-line: variable-name
-  click_command_event: EventEmitter<number> = new EventEmitter<number>();
+  click_command_event: EventEmitter<string> = new EventEmitter<string>();
 
   @Input() name: string;
+  @Input() key: string;
   @Input() status: string;
 
   constructor() { }
@@ -19,6 +20,6 @@ export class CommandComponent implements OnInit {
   ngOnInit() {}
 
   click_command() {
-    this.click_command_event.emit(1);
+    this.click_command_event.emit(this.key);
   }
 }

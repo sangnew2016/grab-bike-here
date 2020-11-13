@@ -1,4 +1,5 @@
 import { EventEmitter, Injectable } from '@angular/core';
+import { DataService } from './data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +10,10 @@ export class GlobalService {
   callback_LoadMap_Emitter = new EventEmitter();
   callback_LoadMapWithPlaceId_Emitter = new EventEmitter();
 
+  callback_ListOfDriverLocation_Emitter = new EventEmitter();
+  callback_ListOfUserLocation_Emitter = new EventEmitter();
+  callback_WatchingDrivers_Emitter = new EventEmitter();
+
   callback_SetDestinationPosition_Emitter = new EventEmitter();
   callback_GetDestinationPosition_Emitter = new EventEmitter();
 
@@ -17,10 +22,20 @@ export class GlobalService {
 
   callback_SetCommandStatus_Emitter = new EventEmitter();
 
+  callback_PushCurrentLocation_Emitter = new EventEmitter();
+
+
   // 2. object binding
   command: any = {
     text: 'Unknown',
     status: 'hide'
+  };
+
+  account: any = {
+    userid: 'sangthach',
+    email: 'sang@gmail.com',
+    phone: '0923456543',
+    type: 'driver'            // driver, customer, admin
   };
 
   bookABike: any = {
@@ -37,7 +52,7 @@ export class GlobalService {
     amount: 0.0
   };
 
-  constructor() {
+  constructor(private dataService: DataService) {
 
     this.callback_SetCurrentPosition_Emitter.subscribe((currentPosition) => {
       this.bookABike.currentAddress = currentPosition.address;
@@ -85,6 +100,14 @@ export class GlobalService {
       // reset status of button -> app-command
       this.command.status = distance > 0 ? 'enable' : 'disable';
 
+    });
+
+    this.callback_PushCurrentLocation_Emitter.subscribe((position) => {
+      this.dataService.push('demo_sse.php');
+    });
+
+    this.callback_WatchingDrivers_Emitter.subscribe(() => {
+      this.dataService.pushWatching('demo_sse.php');
     });
 
   }

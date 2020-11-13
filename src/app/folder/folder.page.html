@@ -5,7 +5,11 @@
       <div class="header-title">{{ folder }}</div>
     </ion-buttons>
     <div class="header-command">
-      <app-command [name]="globalService.command.text" [status]="globalService.command.status" (click_command_event)="click_command($event)"></app-command>
+      <app-command [name]="globalService.command.text" 
+                  [status]="globalService.command.status" 
+                  [key]="routeKey"
+                  (click_command_event)="click_command($event)">
+      </app-command>
     </div>
   </ion-toolbar>
   

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { GlobalService } from 'src/app/utils/global.service';
 
 @Component({
   selector: 'app-account',
@@ -9,7 +10,7 @@ export class AccountComponent implements OnInit {
 
   public accountStatus: number;
 
-  constructor() { }
+  constructor(private globalService: GlobalService) { }
 
   ngOnInit() {
     // verify account status
@@ -26,6 +27,11 @@ export class AccountComponent implements OnInit {
 
   click_login(emittedValue){
     this.accountStatus = emittedValue;      // 3 = account info
+
+    // check valid account (after login, if driver -> watchingPosition)
+    if (this.globalService.account.type === 'driver') {
+      this.globalService.callback_WatchingDrivers_Emitter.emit();
+    }
   }
 
   click_update(emittedValue) {

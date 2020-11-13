@@ -17,6 +17,7 @@ import { GoogleMyLocationComponent } from '../components/google-my-location/goog
 import { GoogleMapComponent } from '../components/google-map/google-map.component';
 import { CommandComponent } from '../components/command/command.component';
 import { AccountComponent } from '../components/account/account.component';
+import { DataService } from '../utils/data.service';
 
 @NgModule({
   declarations: [
@@ -39,6 +40,6 @@ import { AccountComponent } from '../components/account/account.component';
     IonicModule,
     FolderPageRoutingModule
   ],
-  providers: [UtilsService, GlobalService]
+  providers: [UtilsService, GlobalService, DataService]
 })
 export class FolderPageModule {}

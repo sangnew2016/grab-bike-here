@@ -29,9 +29,18 @@ export class FolderPage implements OnInit {
 
     this.globalService.setCommandText(id);
 
+  }
 
+  click_command(emittedValue) {
+    if (emittedValue === 'Book_A_Bike') {
+      this.globalService.callback_PushCurrentLocation_Emitter.emit({
+        userid: this.globalService.account.userid,
+        latitude: this.globalService.bookABike.currentLatitude,
+        longtitude: this.globalService.bookABike.currentLongtitude
+      });
 
-
+      this.globalService.callback_ListOfDriverLocation_Emitter.emit();
+    }
   }
 
 
