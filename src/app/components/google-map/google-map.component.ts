@@ -45,6 +45,12 @@ export class GoogleMapComponent implements OnInit {
     this.globalService.callback_LoadMap_Emitter.subscribe(() => {
       this.loadMap();
     });
+
+    this.globalService.callback_LoadMapWithPlaceId_Emitter.subscribe((item) => {
+      this.loadMapWithPlaceId(item.placeId);
+      item.clearAutocomplete();
+      item.setDescription(item.description);
+    });
   }
 
   loadMap() {
@@ -68,15 +74,15 @@ export class GoogleMapComponent implements OnInit {
       this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
 
       // SET EVENT 'tilesloaded'
-      this.map.addListener('tilesloaded', () => {
-        this.lat = this.map.center.lat();
-        this.long = this.map.center.lng();
+      // this.map.addListener('tilesloaded', () => {
+      //   this.lat = this.map.center.lat();
+      //   this.long = this.map.center.lng();
 
-        // this.getAddressFromCoords(this.map.center.lat(), this.map.center.lng(), this.globalService);
-        this.getAddressFromCoordsByBrowser(this.map.center.lat(), this.map.center.lng(), (position) => {
-          this.globalService.callback_SetDestinationPosition_Emitter.emit(position);
-        });
-      });
+      //   // this.getAddressFromCoords(this.map.center.lat(), this.map.center.lng(), this.globalService);
+      //   this.getAddressFromCoordsByBrowser(this.map.center.lat(), this.map.center.lng(), (position) => {
+      //     this.globalService.callback_SetDestinationPosition_Emitter.emit(position);
+      //   });
+      // });
 
       // SET EVENT 'click, tap'
       this.map.addListener('click', (event) => {
@@ -88,17 +94,29 @@ export class GoogleMapComponent implements OnInit {
           const clickedLocation = event.latLng;
 
           // Create the marker.
+          const markerLabel = 'Your Destination!';
+
+          const markerIcon = {
+            url: 'http://image.flaticon.com/icons/svg/252/252025.svg',
+            scaledSize: new google.maps.Size(45, 40),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(32, 65),
+            labelOrigin:  new google.maps.Point(40, 33),
+          };
+
           this.markers.push(new google.maps.Marker(
             {
               position: clickedLocation,
+              animation: google.maps.Animation.BOUNCE,
               map: this.map,
-              // icon: Image,
+              icon: markerIcon,
               title: 'Destination: HERE',
               draggable: false,
               label: {
-                text: 'Destination: HERE',
-                color: '#222222',
-                fontSize: '12px'
+                text: markerLabel,
+                color: '#eb3a44',
+                fontSize: '16px',
+                fontWeight: 'bold'
               }
             }
           ));
@@ -112,8 +130,7 @@ export class GoogleMapComponent implements OnInit {
     }).catch((error) => {
       console.log('Error at loadMap - getCurrentPosition: ', error);
     });
-  }
-
+  }  
 
   getAddressFromCoords(lattitude, longitude, callback) {
     const options: NativeGeocoderOptions = {
@@ -170,6 +187,26 @@ export class GoogleMapComponent implements OnInit {
         console.log('Error at getAddressFromCoordsByBrowser: ', status);
       }
     });
+  }
+
+  loadMapWithPlaceId(placeId) {
+    const request = {
+      placeId
+    };
+    const service = new google.maps.places.PlacesService(this.map);
+
+    service.getDetails(request, (place, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+          const location = place.geometry.location;
+          const latLng = new google.maps.LatLng(location.lat(), location.lng());
+          const mapOptions = {
+            center: latLng,
+            zoom: 15,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+          };
+          this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
+        }
+      });
   }
 
   // FUNCTION SHOWING THE COORDINATES OF THE POINT AT THE CENTER OF THE MAP

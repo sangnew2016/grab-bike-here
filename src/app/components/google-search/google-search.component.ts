@@ -52,8 +52,14 @@ export class GoogleSearchComponent implements OnInit {
   // wE CALL THIS FROM EACH ITEM.
   SelectSearchResult(item) {
     /// WE CAN CONFIGURE MORE COMPLEX FUNCTIONS SUCH AS UPLOAD DATA TO FIRESTORE OR LINK IT TO SOMETHING
-    alert(JSON.stringify(item));
+    console.log('Item selected on autocomplete: ', JSON.stringify(item));
     this.placeid = item.place_id;
+    this.globalService.callback_LoadMapWithPlaceId_Emitter.emit({
+      placeId: item.place_id,
+      description: item.description,
+      setDescription: ((value) => this.autocomplete.input = value).bind(this),
+      clearAutocomplete: this.ClearAutocomplete.bind(this)       // avoid publish back
+    });
   }
 
 

@@ -7,6 +7,7 @@ export class GlobalService {
 
   // 1. event emitter
   callback_LoadMap_Emitter = new EventEmitter();
+  callback_LoadMapWithPlaceId_Emitter = new EventEmitter();
 
   callback_SetDestinationPosition_Emitter = new EventEmitter();
   callback_GetDestinationPosition_Emitter = new EventEmitter();
