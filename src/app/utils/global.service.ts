@@ -5,6 +5,10 @@ import { DataService } from './data.service';
   providedIn: 'root'
 })
 export class GlobalService {
+  // 0. global variable
+  global: any = {
+    apiUrl: 'https://localhost:44336/api/'
+  };
 
   // 1. event emitter
   callback_LoadMap_Emitter = new EventEmitter();
@@ -32,7 +36,8 @@ export class GlobalService {
   };
 
   account: any = {
-    userid: 'sangthach',
+    userid: '000111',
+    username: 'sangthach',
     email: 'sang@gmail.com',
     phone: '0923456543',
     type: 'driver'            // driver, customer, admin
@@ -103,7 +108,8 @@ export class GlobalService {
     });
 
     this.callback_PushCurrentLocation_Emitter.subscribe((position) => {
-      this.dataService.push('demo_sse.php');
+      // put by api (one by one)
+      this.dataService.put(this.global.apiUrl + 'position', position);
     });
 
     this.callback_WatchingDrivers_Emitter.subscribe(() => {

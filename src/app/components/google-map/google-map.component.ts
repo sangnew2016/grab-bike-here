@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { NativeGeocoder, NativeGeocoderResult, NativeGeocoderOptions } from '@ionic-native/native-geocoder/ngx';
+import { DataService } from 'src/app/utils/data.service';
 import { GlobalService } from '../../utils/global.service';
 
 declare var google;
@@ -35,7 +36,8 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
   constructor(private geolocation: Geolocation,
               private nativeGeocoder: NativeGeocoder,
               public zone: NgZone,
-              private globalService: GlobalService)
+              private globalService: GlobalService,
+              private dataService: DataService)
   {
     // use for browser (should replace by mobile)
     this.GeoCoder = new google.maps.Geocoder();
@@ -60,10 +62,9 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
       item.setDescription(item.description);
     });
 
-    this.globalService.callback_ListOfDriverLocation_Emitter.subscribe((item) => {      
-      this.intervalId = setInterval(() => {
-        this.listOfDriverLocation(item);
-        }, 5000);
+    this.globalService.callback_ListOfDriverLocation_Emitter.subscribe(() => {
+      // No need setInterval - use SSE (server sent event)
+      this.listOfDriverLocation();
     });
   }
 
@@ -286,29 +287,22 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
     getNearbyPlaces.bind(this)(currentPosition);
   }
 
-  listOfDriverLocation(item) {
-    // 0. clear old coordinate
-    this.driverMarkers.forEach(driverMarker => driverMarker.setMap(null));
-    this.driverMarkers = [];
+  listOfDriverLocation() {
+    // 0. get locations of driver
+    this.dataService.pushTwoway(this.globalService.global.apiUrl + 'position/drivers?username=' + this.globalService.account.username, (item) => {
+      // 1. clear old coordinate
+      this.driverMarkers.forEach(driverMarker => driverMarker.setMap(null));
+      this.driverMarkers = [];
 
-    // 1. fake data
-    const fakeItems = [
-      {
-        userid: 'sangthach',
-        latitude: '',
-        longtitude: ''
-      }
-    ];
-
-    // 2. show coordinates -> map
-    const image = 'https://goo.gl/dqvvFA';
-    fakeItems.forEach((fakeItem) => {
+      // 2. show coordinates -> map
+      const image = 'https://goo.gl/dqvvFA';
       this.driverMarkers.push(new google.maps.Marker({
-        position: { lat: fakeItem.latitude, lng: fakeItem.longtitude },
+        position: { lat: Number(item.latitude), lng: Number(item.longtitude) },
         map: this.map,
         icon: image,
-        title: fakeItem.userid
+        title: item.userName
       }));
+
     });
   }
 
