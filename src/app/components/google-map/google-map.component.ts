@@ -2,6 +2,7 @@ import { ThrowStmt } from '@angular/compiler';
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { NativeGeocoder, NativeGeocoderResult, NativeGeocoderOptions } from '@ionic-native/native-geocoder/ngx';
+import { interval } from 'rxjs';
 import { DataService } from 'src/app/utils/data.service';
 import { GlobalService } from '../../utils/global.service';
 
@@ -120,7 +121,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
           this.long = clickedLocation.lng();
 
           // Create the marker.
-          this.setMarker('Your Destination', clickedLocation);
+          this.setMarker(this.markers, 'Your Destination', clickedLocation);
 
           // this.getAddressFromCoords(clickedLocation.lat(), clickedLocation.lng(), this.globalService);
           this.getAddressFromCoordsByBrowser(clickedLocation.lat(), clickedLocation.lng(), (position) => {
@@ -201,7 +202,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
         this.map.setCenter(latAndLong);
 
-        this.setMarker('Your Destination', latAndLong);
+        this.setMarker(this.markers, 'Your Destination', latAndLong);
       }
     });
   }
@@ -261,22 +262,26 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
   listOfDriverLocation() {
     // 0. get locations of driver
-    this.dataService.pushTwoway(this.globalService.global.apiUrl +
-        'position/drivers?username=' + this.globalService.account.username, (item) => {
-      // 1. clear old coordinate
-      this.driverMarkers.forEach(driverMarker => driverMarker.setMap(null));
-      this.driverMarkers = [];
+    const looping = interval(30 * 1000);    // 30s
+    looping.subscribe(() => {
+      this.dataService.get(this.globalService.global.apiUrl + 
+        'position/drivers?username=' + this.globalService.account.username, (positions) => {
 
-      // 2. show coordinates -> map
-      const image = 'https://s3.amazonaws.com/my.common/giphy_maps.gif';
-      this.driverMarkers.push(new google.maps.Marker({
-        position: { lat: Number(item.latitude), lng: Number(item.longtitude) },
-        map: this.map,
-        icon: image,
-        title: item.userName
-      }));
+        positions.forEach((item) => {
+          const latAndLong = new google.maps.LatLng(Number(item.latitude), Number(item.longtitude));
+          this.setMarker(
+            this.driverMarkers,
+            this.globalService.account.username,
+            latAndLong,
+            google.maps.Animation.BOUNCE,
+            true,
+            'https://s3.amazonaws.com/my.common/giphy_maps.gif'
+          );
+        });
 
+      });
     });
+
   }
 
   // private function
@@ -305,11 +310,15 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
 
   // private function
-  setMarker(title, latAndLong, isClearAllBeforeSet = true, imageUrl = 'http://image.flaticon.com/icons/svg/252/252025.svg') {
+  setMarker(markers, title, latAndLong,
+            isClearAllBeforeSet = true,
+            animation = google.maps.Animation.BOUNCE,
+            imageUrl = 'http://image.flaticon.com/icons/svg/252/252025.svg') {
+
     if (isClearAllBeforeSet) {
       // tslint:disable-next-line: prefer-for-of
-      this.markers.forEach(item => item.setMap(null));
-      this.markers = [];
+      markers.forEach(item => item.setMap(null));
+      markers = [];
     }
 
     const markerLabel = title;
@@ -322,10 +331,10 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
       labelOrigin:  new google.maps.Point(20, 43),
     };
 
-    this.markers.push(new google.maps.Marker(
+    markers.push(new google.maps.Marker(
       {
         position: latAndLong,
-        animation: google.maps.Animation.BOUNCE,      // BOUNCE, DROP
+        animation,      // BOUNCE, DROP
         map: this.map,
         icon: markerIcon,
         title,
