@@ -1,3 +1,4 @@
+import { ThrowStmt } from '@angular/compiler';
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { NativeGeocoder, NativeGeocoderResult, NativeGeocoderOptions } from '@ionic-native/native-geocoder/ngx';
@@ -66,6 +67,10 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
       // No need setInterval - use SSE (server sent event)
       this.listOfDriverLocation();
     });
+
+    this.globalService.callback_DisplayRouteFromTo_Emitter.subscribe(() => {
+      this.displayRouteFromTo('DRIVING');
+    });
   }
 
   ngOnDestroy() {
@@ -109,42 +114,13 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
       // SET EVENT 'click, tap'
       this.map.addListener('click', (event) => {
-          // tslint:disable-next-line: prefer-for-of
-          this.markers.forEach(item => item.setMap(null));
-          this.markers = [];
-
           // Get the location that the user clicked.
           const clickedLocation = event.latLng;
           this.lat = clickedLocation.lat();
           this.long = clickedLocation.lng();
 
           // Create the marker.
-          const markerLabel = 'Your Destination!';
-
-          const markerIcon = {
-            url: 'http://image.flaticon.com/icons/svg/252/252025.svg',
-            scaledSize: new google.maps.Size(45, 40),
-            origin: new google.maps.Point(0, 0),
-            anchor: new google.maps.Point(32, 65),
-            labelOrigin:  new google.maps.Point(40, 33),
-          };
-
-          this.markers.push(new google.maps.Marker(
-            {
-              position: clickedLocation,
-              animation: google.maps.Animation.BOUNCE,
-              map: this.map,
-              icon: markerIcon,
-              title: 'Destination: HERE',
-              draggable: false,
-              label: {
-                text: markerLabel,
-                color: '#eb3a44',
-                fontSize: '16px',
-                fontWeight: 'bold'
-              }
-            }
-          ));
+          this.setMarker('Your Destination', clickedLocation);
 
           // this.getAddressFromCoords(clickedLocation.lat(), clickedLocation.lng(), this.globalService);
           this.getAddressFromCoordsByBrowser(clickedLocation.lat(), clickedLocation.lng(), (position) => {
@@ -215,23 +191,19 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
   }
 
   loadMapWithPlaceId(placeId) {
-    const request = {
-      placeId
-    };
-    const service = new google.maps.places.PlacesService(this.map);
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode( {placeId}, (results, status) => {
+      if (status === google.maps.GeocoderStatus.OK) {
+        const latAndLong = new google.maps.LatLng(
+          results[0].geometry.location.lat(),
+          results[0].geometry.location.lng()
+        );
 
-    service.getDetails(request, (place, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-          const location = place.geometry.location;
-          const latLng = new google.maps.LatLng(location.lat(), location.lng());
-          const mapOptions = {
-            center: latLng,
-            zoom: 15,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
-          };
-          this.map = new google.maps.Map(this.mapElement.nativeElement, mapOptions);
-        }
-      });
+        this.map.setCenter(latAndLong);
+
+        this.setMarker('Your Destination', latAndLong);
+      }
+    });
   }
 
   nearByFilter(item)
@@ -289,13 +261,14 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
   listOfDriverLocation() {
     // 0. get locations of driver
-    this.dataService.pushTwoway(this.globalService.global.apiUrl + 'position/drivers?username=' + this.globalService.account.username, (item) => {
+    this.dataService.pushTwoway(this.globalService.global.apiUrl +
+        'position/drivers?username=' + this.globalService.account.username, (item) => {
       // 1. clear old coordinate
       this.driverMarkers.forEach(driverMarker => driverMarker.setMap(null));
       this.driverMarkers = [];
 
       // 2. show coordinates -> map
-      const image = 'https://goo.gl/dqvvFA';
+      const image = 'https://s3.amazonaws.com/my.common/giphy_maps.gif';
       this.driverMarkers.push(new google.maps.Marker({
         position: { lat: Number(item.latitude), lng: Number(item.longtitude) },
         map: this.map,
@@ -304,6 +277,67 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
       }));
 
     });
+  }
+
+  // private function
+  displayRouteFromTo(mode) {
+    const directionsService = new google.maps.DirectionsService();
+    const directionsDisplay = new google.maps.DirectionsRenderer({ map: this.map });
+
+    directionsService.route({
+        origin: new google.maps.LatLng(
+          this.globalService.bookABike.currentLatitude,
+          this.globalService.bookABike.currentLongtitude
+        ),
+        destination: new google.maps.LatLng(
+          this.globalService.bookABike.destinationLatitude,
+          this.globalService.bookABike.destinationLongtitude
+        ),
+        travelMode: mode,                                        // [DRIVING, WALKING, BICYCLING, TRANSIT]
+    }, (response, status) => {
+        if (status === google.maps.DirectionsStatus.OK) {
+          directionsDisplay.setDirections(response);
+        } else {
+          console.log('Error at callback_DisplayRouteFromTo_Emitter: ', 'Request for getting direction is failed due to ' + status);
+        }
+    });
+  }
+
+
+  // private function
+  setMarker(title, latAndLong, isClearAllBeforeSet = true, imageUrl = 'http://image.flaticon.com/icons/svg/252/252025.svg') {
+    if (isClearAllBeforeSet) {
+      // tslint:disable-next-line: prefer-for-of
+      this.markers.forEach(item => item.setMap(null));
+      this.markers = [];
+    }
+
+    const markerLabel = title;
+
+    const markerIcon = {
+      url: imageUrl,
+      scaledSize: new google.maps.Size(45, 40),
+      origin: new google.maps.Point(0, 0),
+      anchor: new google.maps.Point(20, 43),
+      labelOrigin:  new google.maps.Point(20, 43),
+    };
+
+    this.markers.push(new google.maps.Marker(
+      {
+        position: latAndLong,
+        animation: google.maps.Animation.BOUNCE,      // BOUNCE, DROP
+        map: this.map,
+        icon: markerIcon,
+        title,
+        draggable: false,
+        label: {
+          text: markerLabel,
+          color: '#eb3a44',
+          fontSize: '16px',
+          fontWeight: 'bold'
+        }
+      }
+    ));
   }
 
   // FUNCTION SHOWING THE COORDINATES OF THE POINT AT THE CENTER OF THE MAP

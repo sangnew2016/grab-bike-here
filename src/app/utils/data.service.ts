@@ -9,7 +9,8 @@ export class DataService {
 
   constructor(private http: HttpClient) { }
 
-  source: any;
+  source: any = null;
+  sourceWatching: any = null;
 
   url: any;
 
@@ -20,7 +21,7 @@ export class DataService {
   };
 
   pushOneway(url) {
-    if (typeof(EventSource) !== 'undefined') {      
+    if (typeof(EventSource) !== 'undefined' && !this.source) {
       this.source = new EventSource(url);
 
       this.source.onopen = () => {
@@ -38,7 +39,7 @@ export class DataService {
   }
 
   pushTwoway(url, callback = null) {
-    if (typeof(EventSource) !== 'undefined') {      
+    if (typeof(EventSource) !== 'undefined' && !this.source) {
       this.source = new EventSource(url);
 
       this.source.onopen = () => {
@@ -63,18 +64,34 @@ export class DataService {
   }
 
   pushWatching(url, parameter) {
-    if (parameter.userType !== 'driver') { return; }
+    let keepPosition: any = null;
 
     if (navigator.geolocation) {
       navigator.geolocation.watchPosition((position) => {
-        const item = {
-          userid: parameter.userid,
-          userType: 'driver',
-          latitude: parameter.latitude,
-          longtitude: parameter.longtitude
-        };
+        if (typeof(EventSource) === 'undefined') {
+          console.log('Error at callback_WatchingDrivers_Emitter: ', 'Your browser does not support server-sent events...');
+          return;
+        }
 
-        const source = new EventSource(url, );
+        // No action, if have no change position
+        if (keepPosition &&
+                keepPosition.coords.latitude === position.coords.latitude &&
+                keepPosition.coords.longitude === position.coords.longitude)
+        {
+          // nothing to do
+        } else {
+          keepPosition = position;
+
+          // create rest-api to push new position of driver
+          const item = {
+            userName: parameter.userName,
+            userType: parameter.userType,
+            latitude: position.coords.latitude + '',
+            longtitude: position.coords.longitude + ''
+          };
+          this.put(url, item);
+        }
+
       });
     } else {
       console.log('Error at callback_WatchingDrivers_Emitter: ', 'Geolocation is not supported by this browser.');

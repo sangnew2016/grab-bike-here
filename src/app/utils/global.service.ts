@@ -17,6 +17,7 @@ export class GlobalService {
   callback_ListOfDriverLocation_Emitter = new EventEmitter();
   callback_ListOfUserLocation_Emitter = new EventEmitter();
   callback_WatchingDrivers_Emitter = new EventEmitter();
+  callback_DisplayRouteFromTo_Emitter = new EventEmitter();
 
   callback_SetDestinationPosition_Emitter = new EventEmitter();
   callback_GetDestinationPosition_Emitter = new EventEmitter();
@@ -32,7 +33,7 @@ export class GlobalService {
   // 2. object binding
   command: any = {
     text: 'Unknown',
-    status: 'hide'
+    status: 'hide'            // hide, enable, disable
   };
 
   account: any = {
@@ -113,7 +114,12 @@ export class GlobalService {
     });
 
     this.callback_WatchingDrivers_Emitter.subscribe(() => {
-      this.dataService.pushWatching('demo_sse.php');
+      this.dataService.pushWatching(this.global.apiUrl + 'position', {
+        userName: this.account.username,
+        userType: this.account.type,
+        latitude: '',
+        longtitude: ''
+      });
     });
 
   }

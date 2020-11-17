@@ -13,6 +13,7 @@ export class GoogleSearchComponent implements OnInit {
   autocomplete: { input: string; };
   autocompleteItems: any[];
   placeid: any;
+  address: any;
   GoogleAutocomplete: any;
 
   constructor(
@@ -54,12 +55,28 @@ export class GoogleSearchComponent implements OnInit {
     /// WE CAN CONFIGURE MORE COMPLEX FUNCTIONS SUCH AS UPLOAD DATA TO FIRESTORE OR LINK IT TO SOMETHING
     console.log('Item selected on autocomplete: ', JSON.stringify(item));
     this.placeid = item.place_id;
-    this.globalService.callback_LoadMapWithPlaceId_Emitter.emit({
-      placeId: item.place_id,
-      description: item.description,
-      setDescription: ((value) => this.autocomplete.input = value).bind(this),
-      clearAutocomplete: this.ClearAutocomplete.bind(this)       // avoid publish back
-    });
+    this.address = item.description;
+
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode( {placeId: this.placeid}, (results, status) => {
+        if (status === google.maps.GeocoderStatus.OK) {
+          const position = {
+            address: this.address,
+            latitude: results[0].geometry.location.lat(),
+            longtitude: results[0].geometry.location.lng()
+          };
+
+          this.globalService.callback_SetDestinationPosition_Emitter.emit(position);
+
+          this.globalService.callback_LoadMapWithPlaceId_Emitter.emit({
+            placeId: item.place_id,
+            description: item.description,
+            setDescription: ((value) => this.autocomplete.input = value).bind(this),
+            clearAutocomplete: this.ClearAutocomplete.bind(this)       // avoid publish back
+          });
+
+        }
+      });
   }
 
 
