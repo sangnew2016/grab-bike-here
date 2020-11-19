@@ -118,10 +118,10 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
           // Get the location that the user clicked.
           const clickedLocation = event.latLng;
           this.lat = clickedLocation.lat();
-          this.long = clickedLocation.lng();
+          this.long = clickedLocation.lng();          
 
           // Create the marker.
-          this.setMarker(this.markers, 'Your Destination', clickedLocation);
+          this.markers = this.setMarker(this.markers, 'Your Destination', clickedLocation);
 
           // this.getAddressFromCoords(clickedLocation.lat(), clickedLocation.lng(), this.globalService);
           this.getAddressFromCoordsByBrowser(clickedLocation.lat(), clickedLocation.lng(), (position) => {
@@ -272,9 +272,9 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
           this.setMarker(
             this.driverMarkers,
             this.globalService.account.email,
-            latAndLong,
-            google.maps.Animation.BOUNCE,
+            latAndLong,            
             true,
+            google.maps.Animation.BOUNCE,
             'https://s3.amazonaws.com/my.common/giphy_maps.gif'
           );
         });
@@ -331,7 +331,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
       labelOrigin:  new google.maps.Point(20, 43),
     };
 
-    markers.push(new google.maps.Marker(
+    const marker = new google.maps.Marker(
       {
         position: latAndLong,
         animation,      // BOUNCE, DROP
@@ -346,7 +346,11 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
           fontWeight: 'bold'
         }
       }
-    ));
+    );
+
+    markers.push(marker);
+
+    return markers;
   }
 
   // FUNCTION SHOWING THE COORDINATES OF THE POINT AT THE CENTER OF THE MAP
