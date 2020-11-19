@@ -45,8 +45,11 @@ export class FolderPage implements OnInit {
       // Display Route [from - to]
       this.globalService.callback_DisplayRouteFromTo_Emitter.emit();
 
-      // Change command status, clear 
+      // Change command status, clear
       this.globalService.command.status = 'disable';
+
+      // Save into database
+      this.globalService.data_InsertBooking_Emitter.emit();
     }
   }
 

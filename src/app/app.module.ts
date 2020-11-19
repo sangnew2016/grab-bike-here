@@ -13,6 +13,7 @@ import { AppRoutingModule } from './app-routing.module';
 // IMPORT THE PLUGINS
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { NativeGeocoder } from '@ionic-native/native-geocoder/ngx';
+import { IonicStorageModule } from '@ionic/storage';
 
 @NgModule({
   declarations: [AppComponent],
@@ -20,6 +21,7 @@ import { NativeGeocoder } from '@ionic-native/native-geocoder/ngx';
   imports: [
     BrowserModule,
     IonicModule.forRoot(),
+    IonicStorageModule.forRoot(),
     AppRoutingModule,
     HttpClientModule
   ],

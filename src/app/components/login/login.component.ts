@@ -9,23 +9,28 @@ export class LoginComponent implements OnInit {
 
   @Output()
   // tslint:disable-next-line: variable-name
-  click_register_event: EventEmitter<number> = new EventEmitter<number>();
+  click_open_register_event: EventEmitter<number> = new EventEmitter<number>();
 
   @Output()
   // tslint:disable-next-line: variable-name
   click_login_event: EventEmitter<number> = new EventEmitter<number>();
 
+  account: any = {
+    username: '',
+    password: ''
+  };
+
   constructor() { }
 
   ngOnInit() {}
 
-  click_register() {
-    this.click_register_event.emit(1);      //1 == register
+  click_open_register() {
+    this.click_open_register_event.emit(1);      //1 == register
   }
 
-  click_login() {
+  login() {
     // verify account in database and get token
     // ...
-    this.click_login_event.emit(3);         //3 == account info
+    this.click_login_event.emit(this.account);         //3 == account info
   }
 }

@@ -1,5 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { DataService } from './data.service';
+import { Storage } from '@ionic/storage';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +30,12 @@ export class GlobalService {
 
   callback_PushCurrentLocation_Emitter = new EventEmitter();
 
+  data_RegisterAccount_Emitter = new EventEmitter();
+  data_LoginToGetToken_Emitter = new EventEmitter();
+  data_UpdateAccount_Emitter = new EventEmitter();
+
+  data_InsertBooking_Emitter = new EventEmitter();
+
 
   // 2. object binding
   command: any = {
@@ -37,11 +44,16 @@ export class GlobalService {
   };
 
   account: any = {
-    userid: '000111',
-    username: 'sangthach',
-    email: 'sang@gmail.com',
-    phone: '0923456543',
-    type: 'driver'            // driver, customer, admin
+    userid: '',
+    username: '',
+    fullName: '',
+    email: '',
+    phone: '',
+    idcard: '',
+    address: '',
+    avatar: '',
+    status: 2,                // 1: register, 2: login (default), 3: account info
+    type: ''                  // driver, customer, admin
   };
 
   bookABike: any = {
@@ -58,7 +70,7 @@ export class GlobalService {
     amount: 0.0
   };
 
-  constructor(private dataService: DataService) {
+  constructor(private storage: Storage, private dataService: DataService) {
 
     this.callback_SetCurrentPosition_Emitter.subscribe((currentPosition) => {
       this.bookABike.currentAddress = currentPosition.address;
@@ -103,6 +115,10 @@ export class GlobalService {
         amount: formatNumber(amount.toFixed(0))
       });
 
+      // update value into tree
+      this.bookABike.distance = distance;
+      this.bookABike.amount = amount;
+
       // reset status of button -> app-command
       this.command.status = distance > 0 ? 'enable' : 'disable';
 
@@ -119,6 +135,42 @@ export class GlobalService {
         userType: this.account.type,
         latitude: '',
         longtitude: ''
+      });
+    });
+
+    this.data_RegisterAccount_Emitter.subscribe((account) => {
+      this.dataService.post(this.global.apiUrl + 'account/register', account, (rowAffected) => {
+        console.log(rowAffected ? 'Your account has been created.' : 'Error: check server api log for register');
+        if (rowAffected) {
+          this.account.status = 2;      // 2 = login
+        }
+      });
+    });
+
+    this.data_LoginToGetToken_Emitter.subscribe((login) => {
+      this.dataService.post(this.global.apiUrl + 'account/login', login, (result) => {
+        if (result && result.token) {
+          // keep into device
+          this.storage.set('token', 'Bearer ' + result.token);
+          this.account.status = 3;      // 3 = account info
+        }
+      });
+    });
+
+    this.data_UpdateAccount_Emitter.subscribe((account) => {
+      this.dataService.put(this.global.apiUrl + 'account/update', account, (result) => {
+        if (result) {
+          console.log('Your account has been updated.');
+        }
+      });
+    });
+
+    this.data_InsertBooking_Emitter.subscribe(() => {
+      this.dataService.post(this.global.apiUrl + 'position', {
+        bookABike: this.bookABike
+      }, () => {
+        // toast up message
+        alert('Your booking has been processing...');
       });
     });
 

@@ -10,31 +10,69 @@ export class AccountComponent implements OnInit {
 
   public accountStatus: number;
 
-  constructor(private globalService: GlobalService) { }
+  constructor(public globalService: GlobalService) { }
 
   ngOnInit() {
     // verify account status
-    this.accountStatus = 2;                 // default: 2 = login
+    this.accountStatus = this.globalService.account.status;
   }
 
-  click_register(emittedValue){
-    this.accountStatus = emittedValue;      // 1 = register
+  click_open_register(emittedValue){
+    this.globalService.account.status = 1;      // 1 = register
   }
 
+  /**
+   *
+   * @param emittedValue
+   * {
+   *    action: 2,        // 2 = login
+   *    fullName: '',
+   *    userName: '',
+   *    email: '',
+   *    phone: '',
+   *    password: '',
+   *    passwordConfirm: '',
+   *    type: 'customer',
+   *    idCard: '',
+   *    address: '',
+   *    avatar: ''
+   *  }
+   */
   redirect_login(emittedValue) {
-    this.accountStatus = emittedValue;      // 2 = login
+    // register data -> server
+    this.globalService.data_RegisterAccount_Emitter.emit(emittedValue);
   }
 
-  click_login(emittedValue){
-    this.accountStatus = emittedValue;      // 3 = account info
+  /**
+   *
+   * @param emittedValue
+   * {
+   *    username: '',
+   *    password: ''
+   * }
+   */
+  click_login(emittedValue) {
+    // get token
+    this.globalService.data_LoginToGetToken_Emitter.emit(emittedValue);
 
-    // check valid account (after login, if driver -> watchingPosition)
     if (this.globalService.account.type === 'driver') {
       this.globalService.callback_WatchingDrivers_Emitter.emit();
     }
   }
 
+  /**
+   *
+   * @param emittedValue
+   * {
+   *     fullName: '',
+   *     email: '',
+   *     phone: '',
+   *     idCard: '',
+   *     address: '',
+   *     avatar: ''
+   * }
+   */
   click_update(emittedValue) {
-    // ...
+    this.globalService.data_UpdateAccount_Emitter.emit(emittedValue);
   }
 }

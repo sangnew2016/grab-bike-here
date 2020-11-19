@@ -1,4 +1,4 @@
-<form id="account-info" #form="ngForm" (ngSubmit)="updateAccount(form)">
+<form id="account-info" #form="ngForm" (ngSubmit)="update(form)">
   <ion-grid>
     <ion-row color="primary" justify-content-center>
       <ion-col align-self-center size-md="6" size-lg="5" size-xs="12">
@@ -7,14 +7,25 @@
         </div>
         <div padding>
           <ion-item>
-            <ion-input  name="name" type="text" placeholder="Minh Sang" ngModel required></ion-input>
+            <ion-input  name="fullName" type="text" placeholder="Minh Sang" [(ngModel)]="account.fullName" required></ion-input>
           </ion-item>
           <ion-item>
-            <ion-input name="email" type="email" placeholder="sang@gmail.com" ngModel required></ion-input>
+            <ion-input name="email" type="email" placeholder="email" [(ngModel)]="account.email" required></ion-input>
           </ion-item>
           <ion-item>
-            <ion-input name="phone" type="phone" placeholder="0918 457 820" ngModel required></ion-input>
+            <ion-input name="phone" type="phone" placeholder="phone" [(ngModel)]="account.phone" required></ion-input>
           </ion-item>                
+
+          <ion-item>
+            <ion-input  name="idCard" type="text" placeholder="id card" [(ngModel)]="account.idcard"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-input name="address" type="text" placeholder="address" [(ngModel)]="account.address"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-input name="avatar" type="text" placeholder="avatar" [(ngModel)]="account.avatar"></ion-input>
+          </ion-item>
+
         </div>
         <div padding>
           <ion-button  size="large" type="submit" [disabled]="form.invalid" expand="block">UPDATE</ion-button>
