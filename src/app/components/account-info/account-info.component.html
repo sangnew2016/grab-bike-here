@@ -7,23 +7,23 @@
         </div>
         <div padding>
           <ion-item>
-            <ion-input  name="fullName" type="text" placeholder="Minh Sang" [(ngModel)]="account.fullName" required></ion-input>
+            <ion-input  name="fullName" type="text" placeholder="Minh Sang" [(ngModel)]="globalService.account.fullName" required></ion-input>
           </ion-item>
           <ion-item>
-            <ion-input name="email" type="email" placeholder="email" [(ngModel)]="account.email" required></ion-input>
+            <ion-input name="email" type="email" placeholder="email" [(ngModel)]="globalService.account.email" required></ion-input>
           </ion-item>
           <ion-item>
-            <ion-input name="phone" type="phone" placeholder="phone" [(ngModel)]="account.phone" required></ion-input>
+            <ion-input name="phone" type="phone" placeholder="phone" [(ngModel)]="globalService.account.phone" required></ion-input>
           </ion-item>                
 
           <ion-item>
-            <ion-input  name="idCard" type="text" placeholder="id card" [(ngModel)]="account.idcard"></ion-input>
+            <ion-input  name="idCard" type="text" placeholder="id card" [(ngModel)]="globalService.account.idCard"></ion-input>
           </ion-item>
           <ion-item>
-            <ion-input name="address" type="text" placeholder="address" [(ngModel)]="account.address"></ion-input>
+            <ion-input name="address" type="text" placeholder="address" [(ngModel)]="globalService.account.address"></ion-input>
           </ion-item>
           <ion-item>
-            <ion-input name="avatar" type="text" placeholder="avatar" [(ngModel)]="account.avatar"></ion-input>
+            <ion-input name="avatar" type="text" placeholder="avatar" [(ngModel)]="globalService.account.avatar"></ion-input>
           </ion-item>
 
         </div>

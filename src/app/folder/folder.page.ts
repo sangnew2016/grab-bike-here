@@ -33,7 +33,7 @@ export class FolderPage implements OnInit {
     if (emittedValue === 'Book_A_Bike') {
       // Push user position -> database server
       this.globalService.callback_PushCurrentLocation_Emitter.emit({
-        userName: this.globalService.account.username + '',
+        email: this.globalService.account.email + '',
         userType: this.globalService.account.type + '',
         latitude: this.globalService.bookABike.currentLatitude + '',
         longtitude: this.globalService.bookABike.currentLongtitude + ''

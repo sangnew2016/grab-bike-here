@@ -7,10 +7,10 @@
         </div>
         <div padding>
           <ion-item>
-            <ion-input name="email" type="email" placeholder="your@email.com" [(ngModel)]="account.username" required></ion-input>
+            <ion-input name="email" type="email" placeholder="your@email.com" [(ngModel)]="globalService.account.email" required></ion-input>
           </ion-item>
           <ion-item>
-            <ion-input name="password" type="password" placeholder="Password" [(ngModel)]="account.password" required></ion-input>
+            <ion-input name="password" type="password" placeholder="Password" [(ngModel)]="globalService.account.password" required></ion-input>
           </ion-item>
         </div>
         <div padding>

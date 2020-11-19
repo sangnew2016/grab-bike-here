@@ -18,7 +18,7 @@ export class AccountComponent implements OnInit {
   }
 
   click_open_register(emittedValue){
-    this.globalService.account.status = 1;      // 1 = register
+    this.globalService.account.status = 1;            // 1 = register
   }
 
   /**
@@ -27,7 +27,6 @@ export class AccountComponent implements OnInit {
    * {
    *    action: 2,        // 2 = login
    *    fullName: '',
-   *    userName: '',
    *    email: '',
    *    phone: '',
    *    password: '',
@@ -47,7 +46,7 @@ export class AccountComponent implements OnInit {
    *
    * @param emittedValue
    * {
-   *    username: '',
+   *    email: '',
    *    password: ''
    * }
    */

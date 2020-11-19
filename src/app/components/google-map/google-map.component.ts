@@ -265,13 +265,13 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
     const looping = interval(30 * 1000);    // 30s
     looping.subscribe(() => {
       this.dataService.get(this.globalService.global.apiUrl + 
-        'position/drivers?username=' + this.globalService.account.username, (positions) => {
+        'position/drivers?email=' + this.globalService.account.email, (positions) => {
 
         positions.forEach((item) => {
           const latAndLong = new google.maps.LatLng(Number(item.latitude), Number(item.longtitude));
           this.setMarker(
             this.driverMarkers,
-            this.globalService.account.username,
+            this.globalService.account.email,
             latAndLong,
             google.maps.Animation.BOUNCE,
             true,

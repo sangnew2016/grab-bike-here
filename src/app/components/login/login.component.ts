@@ -1,4 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { GlobalService } from 'src/app/utils/global.service';
 
 @Component({
   selector: 'app-login',
@@ -14,13 +15,8 @@ export class LoginComponent implements OnInit {
   @Output()
   // tslint:disable-next-line: variable-name
   click_login_event: EventEmitter<number> = new EventEmitter<number>();
-
-  account: any = {
-    username: '',
-    password: ''
-  };
-
-  constructor() { }
+ 
+  constructor(public globalService: GlobalService) { }
 
   ngOnInit() {}
 
@@ -31,6 +27,6 @@ export class LoginComponent implements OnInit {
   login() {
     // verify account in database and get token
     // ...
-    this.click_login_event.emit(this.account);         //3 == account info
+    this.click_login_event.emit(this.globalService.account);         //3 == account info
   }
 }

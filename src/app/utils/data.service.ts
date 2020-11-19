@@ -1,4 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Storage } from '@ionic/storage';
 import { Injectable } from '@angular/core';
 import { stringify } from 'querystring';
 
@@ -7,7 +8,7 @@ import { stringify } from 'querystring';
 })
 export class DataService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private storage: Storage) { }
 
   source: any = null;
   sourceWatching: any = null;
@@ -84,7 +85,7 @@ export class DataService {
 
           // create rest-api to push new position of driver
           const item = {
-            userName: parameter.userName,
+            email: parameter.email,
             userType: parameter.userType,
             latitude: position.coords.latitude + '',
             longtitude: position.coords.longitude + ''
@@ -126,5 +127,56 @@ export class DataService {
     });
   }
 
+
+
+
+
+  getAuth(url, callback = null) {
+    const fn = (token) => {
+      const headers = new HttpHeaders();
+      headers.append('Content-Type', 'application/json');
+      headers.append('Authorization', token);
+
+      this.http.get(url, { headers }).subscribe((value) => {
+        if (!callback) { return; }
+        callback(value);
+      });
+    };
+
+    this.storage.get('token').then(fn);
+  }
+
+  postAuth(url, params, callback = null) {
+    const fn = (token) => {
+      const headers = new HttpHeaders();
+      headers.append('Content-Type', 'application/json');
+      headers.append('Authorization', token);
+
+      this.http.post(url, params, { headers }).subscribe((value) => {
+        if (!callback) { return; }
+        callback(value);
+      });
+    };
+
+    this.storage.get('token').then(fn);
+  }
+
+  putAuth(url, params, callback = null) {
+    const fn = (token) => {
+      const httpOptions = {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+          Authorization: token
+        })
+      };
+
+      this.http.put(url, params, httpOptions).subscribe((value) => {
+        if (!callback) { return; }
+        callback(value);
+      });
+    };
+
+    this.storage.get('token').then(fn);
+  }
 
 }

@@ -45,13 +45,16 @@ export class GlobalService {
 
   account: any = {
     userid: '',
-    username: '',
+    password: '',
+    passwordConfirm: '',
+
     fullName: '',
     email: '',
     phone: '',
-    idcard: '',
+    idCard: '',
     address: '',
     avatar: '',
+
     status: 2,                // 1: register, 2: login (default), 3: account info
     type: ''                  // driver, customer, admin
   };
@@ -131,7 +134,7 @@ export class GlobalService {
 
     this.callback_WatchingDrivers_Emitter.subscribe(() => {
       this.dataService.pushWatching(this.global.apiUrl + 'position', {
-        userName: this.account.username,
+        email: this.account.email,
         userType: this.account.type,
         latitude: '',
         longtitude: ''
@@ -142,6 +145,10 @@ export class GlobalService {
       this.dataService.post(this.global.apiUrl + 'account/register', account, (rowAffected) => {
         console.log(rowAffected ? 'Your account has been created.' : 'Error: check server api log for register');
         if (rowAffected) {
+          // clear password - confirm password
+          this.account.password = '';
+          this.account.passwordConfirm = '';
+
           this.account.status = 2;      // 2 = login
         }
       });
@@ -153,12 +160,19 @@ export class GlobalService {
           // keep into device
           this.storage.set('token', 'Bearer ' + result.token);
           this.account.status = 3;      // 3 = account info
+
+          this.account.fullName = result.fullName;
+          this.account.email = result.email;
+          this.account.phone = result.phone;
+          this.account.idCard = result.idCard;
+          this.account.address = result.address;
+          this.account.avatar = result.avatar;
         }
       });
     });
 
     this.data_UpdateAccount_Emitter.subscribe((account) => {
-      this.dataService.put(this.global.apiUrl + 'account/update', account, (result) => {
+      this.dataService.putAuth(this.global.apiUrl + 'account/update', account, (result) => {
         if (result) {
           console.log('Your account has been updated.');
         }
