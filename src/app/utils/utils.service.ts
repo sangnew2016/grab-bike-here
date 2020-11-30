@@ -1,10 +1,5 @@
 import { Injectable } from '@angular/core';
 
-String.prototype.proper = function() {
-  // tslint:disable-next-line: only-arrow-functions
-  return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
-};
-
 @Injectable({
   providedIn: 'root'
 })
@@ -17,9 +12,16 @@ export class UtilsService {
 
     let result = '';
     id.split('_').forEach(word => {
-      result += (result ? ' ' : '') + word.proper();
+      result += (result ? ' ' : '') + this.proper(word);
     });
     return result;
   }
-  
+
+  proper(str) {
+    // tslint:disable-next-line: only-arrow-functions
+    return str.replace(/\w\S*/g, function(txt) {
+      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+    });
+  }
+
 }

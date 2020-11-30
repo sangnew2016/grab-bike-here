@@ -11,11 +11,13 @@ import { UtilsService } from '../utils/utils.service';
 export class FolderPage implements OnInit {
   public folder: string;
   public routeKey: string;
-  public accountStatus: number;  
 
   constructor(private activatedRoute: ActivatedRoute,
-              private globalService: GlobalService,
-              private utilsService: UtilsService) { }
+              public globalService: GlobalService,
+              private utilsService: UtilsService
+              )
+  {
+  }
 
   ngOnInit() {
     // format route id
@@ -23,21 +25,33 @@ export class FolderPage implements OnInit {
     this.folder = this.utilsService.formatRouteId(id);
     this.routeKey = id;
 
-    // verify account status
-    this.accountStatus = 2;                 //default: 2 = login
+    this.globalService.setCommandText(id);
 
   }
 
-  click_register(emittedValue){
-    this.accountStatus = emittedValue;      //1 = register     
+  click_command(emittedValue) {
+    if (emittedValue === 'Book_A_Bike') {
+      // Push user position -> database server
+      this.globalService.callback_PushCurrentLocation_Emitter.emit({
+        email: this.globalService.account.email + '',
+        userType: this.globalService.account.type + '',
+        latitude: this.globalService.bookABike.currentLatitude + '',
+        longtitude: this.globalService.bookABike.currentLongtitude + ''
+      });
+
+      // Get all locations of all of Driver
+      this.globalService.callback_ListOfDriverLocation_Emitter.emit();
+
+      // Display Route [from - to]
+      this.globalService.callback_DisplayRouteFromTo_Emitter.emit();
+
+      // Change command status, clear
+      this.globalService.command.status = 'disable';
+
+      // Save into database
+      this.globalService.data_InsertBooking_Emitter.emit();
+    }
   }
 
-  redirect_login(emittedValue) {
-    this.accountStatus = emittedValue;      //2 = login    
-  }
-
-  click_login(emittedValue){
-    this.accountStatus = emittedValue;      //3 = account info    
-  }
 
 }

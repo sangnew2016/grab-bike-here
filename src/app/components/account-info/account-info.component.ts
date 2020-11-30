@@ -1,4 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { GlobalService } from 'src/app/utils/global.service';
 
 @Component({
   selector: 'app-account-info',
@@ -10,13 +11,17 @@ export class AccountInfoComponent implements OnInit {
   @Output()
   // tslint:disable-next-line: variable-name
   click_update_event: EventEmitter<object> = new EventEmitter<object>();
-  
-  constructor() { }
 
-  ngOnInit() {}
+  constructor(public globalService: GlobalService) { }
 
-  click_update() {
-    this.click_update_event.emit({});
+  ngOnInit() {
+  }
+
+  update() {
+    // validate here
+    // ...
+
+    this.click_update_event.emit(this.globalService.account);
   }
 
 }

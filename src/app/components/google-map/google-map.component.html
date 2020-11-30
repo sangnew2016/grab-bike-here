@@ -1,0 +1,11 @@
+<ion-fab vertical="bottom" horizontal="start" slot="fixed">
+  <ion-fab-button (click)="ShowCords()" ion-fab color="tertiary">
+    <ion-icon name="information-circle-outline"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+<div class="map-wrapper" style="height: 100%;">      
+  <div id="map_center">
+    <ion-icon name="pin" size="large" color="danger"></ion-icon>      
+  </div>
+  <div #map id="map"></div>
+</div>

@@ -1,4 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { GlobalService } from 'src/app/utils/global.service';
 
 @Component({
   selector: 'app-register',
@@ -9,14 +10,19 @@ export class RegisterComponent implements OnInit {
 
   @Output()
   // tslint:disable-next-line: variable-name
-  click_register_event: EventEmitter<number> = new EventEmitter<number>();
+  click_register_event: EventEmitter<any> = new EventEmitter<any>();
 
-  constructor() { }
+  constructor(public globalService: GlobalService) { }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.globalService.account.type = 'customer';
+  }
 
-  click_register() {
-    this.click_register_event.emit(2);      //2 = login
+  register() {
+    // validate here
+    // ...
+    
+    this.click_register_event.emit(this.globalService.account);
   }
 
 }

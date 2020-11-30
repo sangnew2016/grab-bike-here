@@ -12,15 +12,34 @@ import { LoginComponent } from '../components/login/login.component';
 import { AccountInfoComponent } from '../components/account-info/account-info.component';
 import { RegisterComponent } from '../components/register/register.component';
 import { GlobalService } from '../utils/global.service';
+import { GoogleSearchComponent } from '../components/google-search/google-search.component';
+import { GoogleMyLocationComponent } from '../components/google-my-location/google-my-location.component';
+import { GoogleMapComponent } from '../components/google-map/google-map.component';
+import { CommandComponent } from '../components/command/command.component';
+import { AccountComponent } from '../components/account/account.component';
+import { DataService } from '../utils/data.service';
 
 @NgModule({
-  declarations: [FolderPage, LoginComponent, AccountInfoComponent, RegisterComponent],
+  declarations: [
+    FolderPage,
+
+    AccountComponent,
+    LoginComponent,
+    AccountInfoComponent,
+    RegisterComponent,
+
+    CommandComponent,
+
+    GoogleMapComponent,
+    GoogleMyLocationComponent,
+    GoogleSearchComponent
+  ],
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
     FolderPageRoutingModule
   ],
-  providers: [UtilsService, GlobalService]
+  providers: [UtilsService, GlobalService, DataService]
 })
 export class FolderPageModule {}

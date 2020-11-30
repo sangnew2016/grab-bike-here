@@ -1,0 +1,14 @@
+<ion-row>    
+  <ion-col size="10">  
+    <div class="container">
+      <div class="block-distance">Distance: <span class="distance-value">{{ distance }}</span> km</div>
+      <div class="block-amount">Amount: <span class="amount-value">{{ amount }}</span> VND</div>
+    </div>    
+  </ion-col>
+  <ion-col size="2">
+    <ion-button (click)="whereIam()" shape="round" fill="outline">
+      <ion-icon slot="start" name="locate"></ion-icon>
+        Where I Am
+      </ion-button>
+  </ion-col>
+</ion-row> 

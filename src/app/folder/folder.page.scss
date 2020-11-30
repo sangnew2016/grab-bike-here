@@ -9,6 +9,7 @@ ion-menu-button {
   right: 0;
   top: 50%;
   transform: translateY(-50%);
+  height: 100vh;    
 }
 
 #container strong {
@@ -27,16 +28,16 @@ ion-menu-button {
   text-decoration: none;
 }
 
+.header-title {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.header-command {
+  float: right; 
+  padding-right: 10px;
+}
+
 /*=========================================
-  LOGIN
+  GOOGLE API
 =========================================*/
-ion-item{
-  --background: #fff;
-  --color: #000;
-}
-ion-button{
-  --background: #000;
-}
-a {
-  color: #fff;
-}

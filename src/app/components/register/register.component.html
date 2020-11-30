@@ -7,23 +7,51 @@
         </div>
         <div padding>
           <ion-item>
-            <ion-input  name="name" type="text" placeholder="Name" ngModel required></ion-input>
+            <ion-input  name="fullName" type="text" placeholder="Full Name" [(ngModel)]="globalService.account.fullName" required></ion-input>
+          </ion-item>          
+          <ion-item>
+            <ion-input name="email" type="email" placeholder="your@email.com" [(ngModel)]="globalService.account.email" required></ion-input>
           </ion-item>
           <ion-item>
-            <ion-input name="email" type="email" placeholder="your@email.com" ngModel required></ion-input>
+            <ion-input name="phone" type="phone" placeholder="Phone" [(ngModel)]="globalService.account.phone" required></ion-input>
           </ion-item>
           <ion-item>
-            <ion-input name="phone" type="phone" placeholder="Phone" ngModel required></ion-input>
+            <ion-input name="password" type="password" placeholder="Password" [(ngModel)]="globalService.account.password" required></ion-input>
           </ion-item>
           <ion-item>
-            <ion-input name="password" type="password" placeholder="Password" ngModel required></ion-input>
+            <ion-input name="confirm" type="password" placeholder="Password confirm" [(ngModel)]="globalService.account.passwordConfirm" required></ion-input>
           </ion-item>
-          <ion-item>
-            <ion-input name="confirm" type="password" placeholder="Password again" ngModel required></ion-input>
-          </ion-item>
+
+          <!-- <ion-item>
+            <ion-label>Account Type: {{ account.type | uppercase }}</ion-label>
+            <ion-select [(ngModel)]="account.type">
+              <ion-option value="customer">Customer</ion-option>
+              <ion-option value="driver">Driver</ion-option>                  
+            </ion-select>
+          </ion-item> -->
+
+          <div>
+            <ion-item>
+              <ion-input name="idCard" type="text" placeholder="Id Card" [(ngModel)]="globalService.account.idCard" ></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input name="address" type="text" placeholder="Address" [(ngModel)]="globalService.account.address" ></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input name="avatar" type="text" placeholder="Avatar" [(ngModel)]="globalService.account.avatar" ></ion-input>
+            </ion-item>
+          </div>
+
+          <!-- <div class="error-container">
+            <div *ngIf="account.password !== account.passwordConfirm">Confirm password is incorrect</div>
+            <div>Password is not matched to policy password</div>
+            <div>Phone is invalid</div>
+            <div>Email is invalid</div>            
+          </div> -->
+
         </div>
         <div padding>
-          <ion-button  size="large" type="submit" [disabled]="form.invalid" expand="block" (click)="click_register()">Register</ion-button>
+          <ion-button  size="large" type="submit" [disabled]="form.invalid" expand="block">Register</ion-button>
         </div>
       </ion-col>
     </ion-row>

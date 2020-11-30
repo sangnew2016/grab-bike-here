@@ -1,0 +1,15 @@
+<div [ngSwitch]="globalService.account.status">
+  <div *ngSwitchCase="1">
+    <app-register (click_register_event)="redirect_login($event)"></app-register>
+  </div>
+  <div *ngSwitchCase="2">
+    <app-login  (click_open_register_event)="click_open_register($event)"
+                (click_login_event)="click_login($event)"></app-login>
+  </div>
+  <div *ngSwitchCase="3">
+    <app-account-info (click_update_event)="click_update($event)"></app-account-info>
+  </div>                
+  <div *ngSwitchDefault>
+    Have an error! Thinking....
+  </div>
+</div>
