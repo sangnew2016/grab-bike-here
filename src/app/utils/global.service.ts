@@ -8,7 +8,8 @@ import { Storage } from '@ionic/storage';
 export class GlobalService {
   // 0. global variable
   global: any = {
-    apiUrl: 'https://localhost:44336/api/'
+    apiUrl: 'https://localhost:44336/api/',
+    circleRadius: 2000                                  // 2 km = 2000 m
   };
 
   // 1. event emitter
@@ -18,6 +19,7 @@ export class GlobalService {
   callback_ListOfDriverLocation_Emitter = new EventEmitter();
   callback_ListOfUserLocation_Emitter = new EventEmitter();
   callback_WatchingDrivers_Emitter = new EventEmitter();
+  callback_WatchingUsers_Emitter = new EventEmitter();
   callback_DisplayRouteFromTo_Emitter = new EventEmitter();
 
   callback_SetDestinationPosition_Emitter = new EventEmitter();
@@ -60,6 +62,10 @@ export class GlobalService {
   };
 
   bookABike: any = {
+    userBookId: '',
+    fullNameDelegate: '',
+    phoneDelegate: '',
+
     currentAddress: '',
     currentLatitude: '',
     currentLongtitude: '',
@@ -161,6 +167,7 @@ export class GlobalService {
           this.storage.set('token', 'Bearer ' + result.token);
           this.account.status = 3;      // 3 = account info
 
+          this.account.userid = result.id;
           this.account.fullName = result.fullName;
           this.account.email = result.email;
           this.account.phone = result.phone;
@@ -180,11 +187,31 @@ export class GlobalService {
     });
 
     this.data_InsertBooking_Emitter.subscribe(() => {
-      this.dataService.post(this.global.apiUrl + 'position', {
-        bookABike: this.bookABike
-      }, () => {
+      this.bookABike.userBookId = this.account.userid;
+      this.bookABike.fullNameDelegate = this.account.fullName;      // will change for part 2
+      this.bookABike.phoneDelegate = this.account.phone;            // will change for part 2
+
+      const book = JSON.parse(JSON.stringify(this.bookABike));
+      const x: any = {};
+      x.currentAddress = book.currentAddress + '';
+      x.currentLatitude = book.currentLatitude + '';
+      x.currentLongtitude = book.currentLongtitude + '';
+
+      x.destinationAddress = book.destinationAddress + '';
+      x.destinationLatitude = book.destinationLatitude + '';
+      x.destinationLongtitude = book.destinationLongtitude + '';
+
+      x.distance = book.distance.toFixed(2) + '';
+      x.amount = book.amount.toFixed(0) + '';
+      x.pricePerKm = book.pricePerKm + '';
+
+      x.fullNameDelegate = book.fullNameDelegate + '';
+      x.phoneDelegate = book.phoneDelegate + '';
+      x.userBookId = book.userBookId + '';
+
+      this.dataService.postAuth(this.global.apiUrl + 'customer/bookabike', x, (result) => {
         // toast up message
-        alert('Your booking has been processing...');
+        console.log('Success,', 'bookId: ', result.bookId);
       });
     });
 

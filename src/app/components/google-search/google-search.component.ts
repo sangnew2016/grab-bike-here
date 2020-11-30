@@ -43,6 +43,7 @@ export class GoogleSearchComponent implements OnInit {
     (predictions, status) => {
       this.autocompleteItems = [];
       this.zone.run(() => {
+        if (!predictions) { return; }
         predictions.forEach((prediction) => {
           this.autocompleteItems.push(prediction);
         });

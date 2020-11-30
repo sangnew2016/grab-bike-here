@@ -26,6 +26,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
   markers: any[] = [];
   driverMarkers: any[] = [];
+  userMarkers: any[] = [];
   intervalId: any;
 
   // list of user's location
@@ -71,6 +72,10 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
     this.globalService.callback_DisplayRouteFromTo_Emitter.subscribe(() => {
       this.displayRouteFromTo('DRIVING');
+    });
+
+    this.globalService.callback_WatchingUsers_Emitter.subscribe(() => {            
+      this.listOfUserLocation();
     });
   }
 
@@ -118,7 +123,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
           // Get the location that the user clicked.
           const clickedLocation = event.latLng;
           this.lat = clickedLocation.lat();
-          this.long = clickedLocation.lng();          
+          this.long = clickedLocation.lng();
 
           // Create the marker.
           this.markers = this.setMarker(this.markers, 'Your Destination', clickedLocation);
@@ -202,7 +207,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
         this.map.setCenter(latAndLong);
 
-        this.setMarker(this.markers, 'Your Destination', latAndLong);
+        this.markers = this.setMarker(this.markers, 'Your Destination', latAndLong);
       }
     });
   }
@@ -264,15 +269,40 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
     // 0. get locations of driver
     const looping = interval(30 * 1000);    // 30s
     looping.subscribe(() => {
-      this.dataService.get(this.globalService.global.apiUrl + 
+      this.dataService.get(this.globalService.global.apiUrl +
         'position/drivers?email=' + this.globalService.account.email, (positions) => {
 
         positions.forEach((item) => {
           const latAndLong = new google.maps.LatLng(Number(item.latitude), Number(item.longtitude));
-          this.setMarker(
+          this.driverMarkers = this.setMarker(
             this.driverMarkers,
             this.globalService.account.email,
-            latAndLong,            
+            latAndLong,
+            true,
+            google.maps.Animation.BOUNCE,
+            'https://s3.amazonaws.com/my.common/giphy_maps.gif'
+          );
+        });
+
+      });
+    });
+
+  }
+
+  listOfUserLocation() {
+    // 0. get locations of driver
+    const looping = interval(30 * 1000);    // 30s
+    looping.subscribe(() => {
+      this.dataService.get(this.globalService.global.apiUrl +
+        'position/users?email=' + this.globalService.account.email 
+        + '&radius=' + this.globalService.global.circleRadius, (positions) => {
+
+        positions.forEach((item) => {
+          const latAndLong = new google.maps.LatLng(Number(item.latitude), Number(item.longtitude));
+          this.userMarkers = this.setMarker(
+            this.userMarkers,
+            this.globalService.account.email,
+            latAndLong,
             true,
             google.maps.Animation.BOUNCE,
             'https://s3.amazonaws.com/my.common/giphy_maps.gif'
@@ -356,6 +386,20 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
   // FUNCTION SHOWING THE COORDINATES OF THE POINT AT THE CENTER OF THE MAP
   ShowCords(){
     alert('lat' + this.lat + ', long' + this.long );
+  }
+
+  // private (for driver) - draw circle
+  createCircle(lat, lng, radius) {
+    const circle = new google.maps.Circle({
+      strokeColor: '#888', // Mau vien
+      strokeOpacity: 0.5, // Do mo vien
+      strokeWeight: 1, // Do manh cua duong tron
+      fillColor: '#03A9F4', // Mau nen cua duong tron
+      fillOpacity: 0.1, // Do trong suot
+      map: this.map, // map
+      center: {lat, lng}, // toa do trung tam
+      radius // ban kinh
+    });
   }
 
 }

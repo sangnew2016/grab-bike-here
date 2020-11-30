@@ -133,11 +133,14 @@ export class DataService {
 
   getAuth(url, callback = null) {
     const fn = (token) => {
-      const headers = new HttpHeaders();
-      headers.append('Content-Type', 'application/json');
-      headers.append('Authorization', token);
+      const httpOptions = {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+          Authorization: token
+        })
+      };
 
-      this.http.get(url, { headers }).subscribe((value) => {
+      this.http.get(url, httpOptions).subscribe((value) => {
         if (!callback) { return; }
         callback(value);
       });
@@ -148,11 +151,14 @@ export class DataService {
 
   postAuth(url, params, callback = null) {
     const fn = (token) => {
-      const headers = new HttpHeaders();
-      headers.append('Content-Type', 'application/json');
-      headers.append('Authorization', token);
+      const httpOptions = {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+          Authorization: token
+        })
+      };
 
-      this.http.post(url, params, { headers }).subscribe((value) => {
+      this.http.post(url, params, httpOptions).subscribe((value) => {
         if (!callback) { return; }
         callback(value);
       });
