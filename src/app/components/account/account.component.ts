@@ -53,12 +53,6 @@ export class AccountComponent implements OnInit {
   click_login(emittedValue) {
     // get token
     this.globalService.data_LoginToGetToken_Emitter.emit(emittedValue);
-
-    if (this.globalService.account.type === 'user') {
-      this.globalService.callback_WatchingDrivers_Emitter.emit();
-    } else if (this.globalService.account.type === 'driver') {
-      this.globalService.callback_WatchingUsers_Emitter.emit();
-    }
   }
 
   /**

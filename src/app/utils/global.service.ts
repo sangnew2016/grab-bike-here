@@ -1,6 +1,7 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { DataService } from './data.service';
 import { Storage } from '@ionic/storage';
+import { interval } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -16,10 +17,7 @@ export class GlobalService {
   callback_LoadMap_Emitter = new EventEmitter();
   callback_LoadMapWithPlaceId_Emitter = new EventEmitter();
 
-  callback_ListOfDriverLocation_Emitter = new EventEmitter();
-  callback_ListOfUserLocation_Emitter = new EventEmitter();
-  callback_WatchingDrivers_Emitter = new EventEmitter();
-  callback_WatchingUsers_Emitter = new EventEmitter();
+  callback_ListOfDriverLocation_Emitter = new EventEmitter();  
   callback_DisplayRouteFromTo_Emitter = new EventEmitter();
 
   callback_SetDestinationPosition_Emitter = new EventEmitter();
@@ -31,6 +29,7 @@ export class GlobalService {
   callback_SetCommandStatus_Emitter = new EventEmitter();
 
   callback_PushCurrentLocation_Emitter = new EventEmitter();
+  callback_PushCurrentLocations_Emitter = new EventEmitter();           // monitor position
 
   data_RegisterAccount_Emitter = new EventEmitter();
   data_LoginToGetToken_Emitter = new EventEmitter();
@@ -138,7 +137,7 @@ export class GlobalService {
       this.dataService.put(this.global.apiUrl + 'position', position);
     });
 
-    this.callback_WatchingDrivers_Emitter.subscribe(() => {
+    this.callback_PushCurrentLocations_Emitter.subscribe(() => {
       this.dataService.pushWatching(this.global.apiUrl + 'position', {
         email: this.account.email,
         userType: this.account.type,
@@ -174,6 +173,13 @@ export class GlobalService {
           this.account.idCard = result.idCard;
           this.account.address = result.address;
           this.account.avatar = result.avatar;
+          this.account.type = result.type;
+
+          this.updateCurrentPosition();                               // update current position into global variable
+
+          if (this.account.type === 'driver') {
+            this.callback_PushCurrentLocations_Emitter.emit();        // push position to server
+          }
         }
       });
     });
@@ -250,6 +256,21 @@ export class GlobalService {
     else {
       this.command.status = 'hide';
     }
+  }
+
+  updateCurrentPosition() {
+    const looping = interval(10 * 1000);    // 10s
+    looping.subscribe(() => {
+      // update position into global variable
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          this.bookABike.currentLatitude = position.coords.latitude;
+          this.bookABike.currentLongtitude = position.coords.longitude;
+        });
+      } else {
+        console.log('Detect - updateCurrentPosition: Geolocation is not supported by this browser.');
+      }
+    });
   }
 
 }
