@@ -47,12 +47,16 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
     // list of user's location
     this.bounds = new google.maps.LatLngBounds();
-    this.infoWindow = new google.maps.InfoWindow;
+    this.infoWindow = new google.maps.InfoWindow();
     this.currentInfoWindow = this.infoWindow;
   }
 
   ngOnInit() {
     this.loadMap();
+
+    if (this.globalService.account.type === 'driver') {
+      this.listOfUserLocation();
+    }
 
     // listener
     this.globalService.callback_LoadMap_Emitter.subscribe(() => {
@@ -73,10 +77,6 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
     this.globalService.callback_DisplayRouteFromTo_Emitter.subscribe(() => {
       this.displayRouteFromTo('DRIVING');
     });
-
-    this.globalService.callback_WatchingUsers_Emitter.subscribe(() => {            
-      this.listOfUserLocation();
-    });
   }
 
   ngOnDestroy() {
@@ -87,19 +87,22 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
   loadMap() {
     // FIRST GET THE LOCATION FROM THE DEVICE.
-    this.geolocation.getCurrentPosition().then((resp) => {
-      console.log('current position: ', resp.coords.latitude, resp.coords.longitude);
-      this.currentLat = resp.coords.latitude + '';
-      this.currentLong = resp.coords.longitude + '';
+    setTimeout(() => {
+      const latitude = this.globalService.bookABike.currentLatitude;
+      const longtitude = this.globalService.bookABike.currentLongtitude;
+
+      console.log('current position: ', latitude, longtitude);
+      this.currentLat = latitude + '';
+      this.currentLong = longtitude + '';
 
       // GET ADDRESS
       // this.getAddressFromCoords(resp.coords.latitude, resp.coords.longitude, this.globalService);
-      this.getAddressFromCoordsByBrowser(resp.coords.latitude, resp.coords.longitude, (position) => {
+      this.getAddressFromCoordsByBrowser(latitude, longtitude, (position) => {
         this.globalService.callback_SetCurrentPosition_Emitter.emit(position);
       });
 
       // LOAD THE MAP WITH THE PREVIOUS VALUES AS PARAMETERS.
-      const latLng = new google.maps.LatLng(resp.coords.latitude, resp.coords.longitude);
+      const latLng = new google.maps.LatLng(latitude, longtitude);
       const mapOptions = {
         center: latLng,
         zoom: 15,
@@ -134,9 +137,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
           });
       });
 
-    }).catch((error) => {
-      console.log('Error at loadMap - getCurrentPosition: ', error);
-    });
+    }, 0);
   }
 
   getAddressFromCoords(lattitude, longitude, callback) {
@@ -294,7 +295,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
     const looping = interval(30 * 1000);    // 30s
     looping.subscribe(() => {
       this.dataService.get(this.globalService.global.apiUrl +
-        'position/users?email=' + this.globalService.account.email 
+        'position/users?email=' + this.globalService.account.email
         + '&radius=' + this.globalService.global.circleRadius, (positions) => {
 
         positions.forEach((item) => {

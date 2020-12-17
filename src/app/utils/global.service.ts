@@ -17,7 +17,7 @@ export class GlobalService {
   callback_LoadMap_Emitter = new EventEmitter();
   callback_LoadMapWithPlaceId_Emitter = new EventEmitter();
 
-  callback_ListOfDriverLocation_Emitter = new EventEmitter();  
+  callback_ListOfDriverLocation_Emitter = new EventEmitter();
   callback_DisplayRouteFromTo_Emitter = new EventEmitter();
 
   callback_SetDestinationPosition_Emitter = new EventEmitter();
@@ -175,7 +175,7 @@ export class GlobalService {
           this.account.avatar = result.avatar;
           this.account.type = result.type;
 
-          this.updateCurrentPosition();                               // update current position into global variable
+          this.updateCurrentPosition(false);                               // update current position into global variable
 
           if (this.account.type === 'driver') {
             this.callback_PushCurrentLocations_Emitter.emit();        // push position to server
@@ -258,19 +258,26 @@ export class GlobalService {
     }
   }
 
-  updateCurrentPosition() {
-    const looping = interval(10 * 1000);    // 10s
-    looping.subscribe(() => {
-      // update position into global variable
-      if (navigator.geolocation) {
+  updateCurrentPosition(isLoop) {
+    if (!navigator.geolocation) {
+      console.log('Detect - updateCurrentPosition: Geolocation is not supported by this browser.');
+      return;
+    }
+
+    if (isLoop) {
+      const looping = interval(10 * 1000);    // 10s
+      looping.subscribe(() => {
         navigator.geolocation.getCurrentPosition((position) => {
           this.bookABike.currentLatitude = position.coords.latitude;
           this.bookABike.currentLongtitude = position.coords.longitude;
         });
-      } else {
-        console.log('Detect - updateCurrentPosition: Geolocation is not supported by this browser.');
-      }
-    });
+      });
+    } else {
+      navigator.geolocation.getCurrentPosition((position) => {
+        this.bookABike.currentLatitude = position.coords.latitude;
+        this.bookABike.currentLongtitude = position.coords.longitude;
+      });
+    }
   }
 
 }
