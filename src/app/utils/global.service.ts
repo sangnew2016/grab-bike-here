@@ -12,7 +12,8 @@ export class GlobalService {
   // 0. global variable
   global: any = {
     apiUrl: 'https://localhost:44336/api/',
-    circleRadius: 2000                                  // 2 km = 2000 m
+    circleRadius: 2000,                                   // 2 km = 2000 m
+    timeLoop: 10,                                         // 10 s
   };
 
   cache: any = {
@@ -66,7 +67,8 @@ export class GlobalService {
   data_LoginToGetToken_Emitter = new EventEmitter();
   data_UpdateAccount_Emitter = new EventEmitter();
 
-  data_InsertBooking_Emitter = new EventEmitter();
+  data_BookABike_Emitter = new EventEmitter();                          // for User
+  data_GetABook_Emitter = new EventEmitter();                           // for Driver
 
 
   // 2. object binding
@@ -237,7 +239,7 @@ export class GlobalService {
       });
     });
 
-    this.data_InsertBooking_Emitter.subscribe(() => {
+    this.data_BookABike_Emitter.subscribe(() => {
       this.bookABike.userBookId = this.account.userid;
       this.bookABike.fullNameDelegate = this.account.fullName;      // will change for part 2
       this.bookABike.phoneDelegate = this.account.phone;            // will change for part 2
@@ -266,6 +268,14 @@ export class GlobalService {
       });
     });
 
+    this.data_GetABook_Emitter.subscribe((position) => {
+      this.dataService.postAuth(this.global.apiUrl + 'driver/getabook', position, (result) => {
+        // toast up message
+        console.log('Success,', 'orderId: ', result.orderId);
+
+        alert(`Book of '${position.email}' has been transfered to you. Please make a call him/her`);
+      });
+    });
   }
 
 

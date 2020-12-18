@@ -52,7 +52,7 @@ export class FolderPage implements OnInit {
       this.globalService.command.status = 'disable';
 
       // Save into database
-      this.globalService.data_InsertBooking_Emitter.emit();
+      this.globalService.data_BookABike_Emitter.emit();
     }
   }
 

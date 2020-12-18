@@ -268,7 +268,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
   listOfDriverLocation() {
     // 0. get locations of driver
-    const looping = interval(10 * 1000);    // 30s
+    const looping = interval(this.globalService.global.timeLoop * 1000);    // 10s
     looping.subscribe(() => {
       this.dataService.get(this.globalService.global.apiUrl +
         'position/drivers?email=' + this.globalService.account.email, (positions) => {
@@ -279,6 +279,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
             this.driverMarkers,
             this.globalService.account.email,
             latAndLong,
+            null,
             true,
             google.maps.Animation.BOUNCE,
             'https://s3.amazonaws.com/my.common/giphy_maps.gif'
@@ -291,21 +292,23 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
   }
 
   listOfUserLocation() {
-    // 0. get locations of users
-    const looping = interval(10 * 1000);    // 30s
+    // 0. circular
+    setTimeout(() => {
+      this.createCircle(
+        this.globalService.bookABike.currentLatitude,
+        this.globalService.bookABike.currentLongtitude,
+        this.globalService.global.circleRadius
+      );
+    }, 0);
+
+    // 1. get locations of users
+    const looping = interval(this.globalService.global.timeLoop * 1000);    // 10s
     looping.subscribe(() => {
       this.dataService.get(this.globalService.global.apiUrl +
         'position/users?email=' + this.globalService.account.email
-        + '&radius=' + this.globalService.global.circleRadius, (positions) => {
+        + '&radius=' + this.globalService.global.circleRadius, (positions) => {        
 
-        // circular
-        this.createCircle(
-          this.globalService.bookABike.currentLatitude,
-          this.globalService.bookABike.currentLongtitude,
-          this.globalService.global.circleRadius
-        );
-
-        // set markers
+        // 2. set markers
         positions.forEach((item) => {
           // skip duplicate position
           const isDuplicated = this.userMarkers.some((marker) => {
@@ -317,8 +320,14 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
           const latAndLong = new google.maps.LatLng(Number(item.latitude), Number(item.longtitude));
           this.userMarkers = this.setMarker(
             this.userMarkers,
-            this.globalService.account.email,
+            'Id: ' + item.email,
             latAndLong,
+            ((pos) => {
+              console.log('Detect - clickMarker: ', pos);
+              pos.driverTaken = this.globalService.account.userid + '';
+
+              this.globalService.data_GetABook_Emitter.emit(pos);
+            }).bind(this, item),
             true,
             google.maps.Animation.BOUNCE,
             'https://s3.amazonaws.com/my.common/giphy_maps.gif'
@@ -357,6 +366,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
   // private function
   setMarker(markers, title, latAndLong,
+            clickOnMarkerCallback = null,
             isClearAllBeforeSet = true,
             animation = google.maps.Animation.BOUNCE,
             imageUrl = 'http://image.flaticon.com/icons/svg/252/252025.svg') {
@@ -393,6 +403,12 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
         }
       }
     );
+
+    if (clickOnMarkerCallback) {
+      google.maps.event.addListener(marker, 'click', () => {
+        clickOnMarkerCallback();
+      });
+    }
 
     markers.push(marker);
 
