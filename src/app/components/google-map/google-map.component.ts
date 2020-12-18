@@ -268,7 +268,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
   listOfDriverLocation() {
     // 0. get locations of driver
-    const looping = interval(30 * 1000);    // 30s
+    const looping = interval(10 * 1000);    // 30s
     looping.subscribe(() => {
       this.dataService.get(this.globalService.global.apiUrl +
         'position/drivers?email=' + this.globalService.account.email, (positions) => {
@@ -291,13 +291,21 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
   }
 
   listOfUserLocation() {
-    // 0. get locations of driver
+    // 0. get locations of users
     const looping = interval(10 * 1000);    // 30s
     looping.subscribe(() => {
       this.dataService.get(this.globalService.global.apiUrl +
         'position/users?email=' + this.globalService.account.email
         + '&radius=' + this.globalService.global.circleRadius, (positions) => {
 
+        // circular
+        this.createCircle(
+          this.globalService.bookABike.currentLatitude,
+          this.globalService.bookABike.currentLongtitude,
+          this.globalService.global.circleRadius
+        );
+
+        // set markers
         positions.forEach((item) => {
           // skip duplicate position
           const isDuplicated = this.userMarkers.some((marker) => {

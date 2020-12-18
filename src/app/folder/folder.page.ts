@@ -29,7 +29,7 @@ export class FolderPage implements OnInit {
     this.globalService.cache.load('account');
     this.globalService.cache.load('bookABike');
 
-    this.globalService.setCommandText(id);    
+    this.globalService.setCommandText(id);
   }
 
   click_command(emittedValue) {
