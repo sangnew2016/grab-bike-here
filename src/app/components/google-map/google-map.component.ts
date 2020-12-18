@@ -292,13 +292,20 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
 
   listOfUserLocation() {
     // 0. get locations of driver
-    const looping = interval(30 * 1000);    // 30s
+    const looping = interval(10 * 1000);    // 30s
     looping.subscribe(() => {
       this.dataService.get(this.globalService.global.apiUrl +
         'position/users?email=' + this.globalService.account.email
         + '&radius=' + this.globalService.global.circleRadius, (positions) => {
 
         positions.forEach((item) => {
+          // skip duplicate position
+          const isDuplicated = this.userMarkers.some((marker) => {
+            return marker.position.lat() === Number(item.latitude) && marker.position.lng() === Number(item.longtitude);
+          });
+          if (isDuplicated) { return; }
+
+          // set marker into Map
           const latAndLong = new google.maps.LatLng(Number(item.latitude), Number(item.longtitude));
           this.userMarkers = this.setMarker(
             this.userMarkers,
