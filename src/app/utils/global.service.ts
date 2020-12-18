@@ -1,7 +1,9 @@
 import { EventEmitter, Injectable } from '@angular/core';
-import { DataService } from './data.service';
 import { Storage } from '@ionic/storage';
 import { interval } from 'rxjs';
+
+import { DataService } from './data.service';
+import { UtilsService } from './utils.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +13,35 @@ export class GlobalService {
   global: any = {
     apiUrl: 'https://localhost:44336/api/',
     circleRadius: 2000                                  // 2 km = 2000 m
+  };
+
+  cache: any = {
+    set: (key) => {
+      if (key === 'command') {
+        this.utilService.localStorage.set(key, { command: this.command });
+      }
+      else if (key === 'account')
+      {
+        this.utilService.localStorage.set(key, { account: this.account });
+      }
+      else if (key === 'bookABike')
+      {
+        this.utilService.localStorage.set(key, { bookABike: this.bookABike });
+      }
+    },
+    load: (key) => {
+      const temp = this.utilService.localStorage.get(key);
+      if (!temp) { return; }
+
+      this[key] = temp[key];                    // Critical: cache here just for initial info - not for ...
+    },
+    clear: () => {
+      this.utilService.localStorage.clear();
+
+      this.command = this.utilService.clone(this.commandOrg);
+      this.account = this.utilService.clone(this.accountOrg);
+      this.bookABike = this.utilService.clone(this.bookABikeOrg);
+    }
   };
 
   // 1. event emitter
@@ -78,7 +109,18 @@ export class GlobalService {
     amount: 0.0
   };
 
-  constructor(private storage: Storage, private dataService: DataService) {
+  commandOrg: any;
+  accountOrg: any;
+  bookABikeOrg: any;
+
+  constructor(private storage: Storage,
+              private utilService: UtilsService,
+              private dataService: DataService
+    ) {
+
+    this.commandOrg = this.utilService.clone(this.command);
+    this.accountOrg = this.utilService.clone(this.account);
+    this.bookABikeOrg = this.utilService.clone(this.bookABike);
 
     this.callback_SetCurrentPosition_Emitter.subscribe((currentPosition) => {
       this.bookABike.currentAddress = currentPosition.address;
@@ -175,7 +217,10 @@ export class GlobalService {
           this.account.avatar = result.avatar;
           this.account.type = result.type;
 
-          this.updateCurrentPosition(false);                               // update current position into global variable
+          this.updateCurrentPosition(false, () => {                   // update current position into global variable
+            this.cache.set('account');
+            this.cache.set('bookABike');
+          });
 
           if (this.account.type === 'driver') {
             this.callback_PushCurrentLocations_Emitter.emit();        // push position to server
@@ -258,7 +303,7 @@ export class GlobalService {
     }
   }
 
-  updateCurrentPosition(isLoop) {
+  updateCurrentPosition(isLoop, callback = null) {
     if (!navigator.geolocation) {
       console.log('Detect - updateCurrentPosition: Geolocation is not supported by this browser.');
       return;
@@ -270,12 +315,14 @@ export class GlobalService {
         navigator.geolocation.getCurrentPosition((position) => {
           this.bookABike.currentLatitude = position.coords.latitude;
           this.bookABike.currentLongtitude = position.coords.longitude;
+          if (callback) { callback(); }
         });
       });
     } else {
       navigator.geolocation.getCurrentPosition((position) => {
         this.bookABike.currentLatitude = position.coords.latitude;
         this.bookABike.currentLongtitude = position.coords.longitude;
+        if (callback) { callback(); }
       });
     }
   }

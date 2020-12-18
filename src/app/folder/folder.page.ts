@@ -25,8 +25,11 @@ export class FolderPage implements OnInit {
     this.folder = this.utilsService.formatRouteId(id);
     this.routeKey = id;
 
-    this.globalService.setCommandText(id);
+    // re-load localStorage
+    this.globalService.cache.load('account');
+    this.globalService.cache.load('bookABike');
 
+    this.globalService.setCommandText(id);    
   }
 
   click_command(emittedValue) {

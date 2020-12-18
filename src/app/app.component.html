@@ -6,6 +6,8 @@
           <ion-list-header>Grab Bike</ion-list-header>
           <br/>
           <ion-note>hi@ionicframework.com</ion-note>
+          <br/>
+          <ion-note><a href='' (click)="logout()">Logout</a></ion-note>
 
           <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages; let i = index">
             <ion-item (click)="selectedIndex = i" routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" [class.selected]="selectedIndex == i">

@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-
 import { Platform } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
+
+import { GlobalService } from './utils/global.service';
 
 @Component({
   selector: 'app-root',
@@ -53,7 +54,8 @@ export class AppComponent implements OnInit {
   constructor(
     private platform: Platform,
     private splashScreen: SplashScreen,
-    private statusBar: StatusBar
+    private statusBar: StatusBar,
+    private globalService: GlobalService
   ) {
     this.initializeApp();
   }
@@ -70,5 +72,10 @@ export class AppComponent implements OnInit {
     if (path !== undefined) {
       this.selectedIndex = this.appPages.findIndex(page => page.title.toLowerCase() === path.toLowerCase());
     }
+  }
+
+  logout() {
+    // clear global
+    this.globalService.cache.clear();
   }
 }
