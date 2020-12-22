@@ -271,7 +271,7 @@ export class GlobalService {
     this.data_GetABook_Emitter.subscribe((position) => {
       this.dataService.postAuth(this.global.apiUrl + 'driver/getabook', position, (result) => {
         // toast up message
-        console.log('Success,', 'orderId: ', result.orderId);
+        console.log('Success,', 'orderId: ', result.orderId, ', phone: ', result.phone, '', position.email);
 
         alert(`Book of '${position.email}' has been transfered to you. Please make a call him/her`);
       });

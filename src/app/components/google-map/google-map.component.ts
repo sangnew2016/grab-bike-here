@@ -274,10 +274,19 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
         'position/drivers?email=' + this.globalService.account.email, (positions) => {
 
         positions.forEach((item) => {
+          // skip duplicate position
+          const isDuplicated = this.driverMarkers.some((marker) => {
+            return marker.position.lat() === Number(item.latitude) && marker.position.lng() === Number(item.longtitude);
+          });
+          const hasMyDriver = isMyDriver(item);
+
+          if (!hasMyDriver && isDuplicated) { return; }
+
+          // set marker into Map
           const latAndLong = new google.maps.LatLng(Number(item.latitude), Number(item.longtitude));
           this.driverMarkers = this.setMarker(
             this.driverMarkers,
-            this.globalService.account.email,
+            (hasMyDriver ? 'My Driver: ' : 'Driver: ') + item.email,
             latAndLong,
             null,
             true,
@@ -289,6 +298,13 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
       });
     });
 
+    const isMyDriver = (positionFromServer) => {
+      if (!positionFromServer.combineEmail) { return false; }
+
+      const m = positionFromServer.combineEmail.split('___');
+      const emailUser = m[0];
+      return this.globalService.account.email === emailUser;
+    };
   }
 
   listOfUserLocation() {
@@ -306,7 +322,7 @@ export class GoogleMapComponent implements OnInit, OnDestroy {
     looping.subscribe(() => {
       this.dataService.get(this.globalService.global.apiUrl +
         'position/users?email=' + this.globalService.account.email
-        + '&radius=' + this.globalService.global.circleRadius, (positions) => {        
+        + '&radius=' + this.globalService.global.circleRadius, (positions) => {
 
         // 2. set markers
         positions.forEach((item) => {
